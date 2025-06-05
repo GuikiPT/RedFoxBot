@@ -56,10 +56,7 @@ src/
 2. **Information Plugin**:
    - `/ping` command with enhanced latency display
 
-3. **Music Plugin**:
-   - Lavalink-based playback with `/play`, `/skip`, `/pause`, `/resume`, `/queue`, `/nowplaying`, `/stop`
-
-4. **Example Plugin** (for reference):
+3. **Example Plugin** (for reference):
    - `/hello` command with user mentions and embeds
    - Message reaction to "good bot" messages
 
