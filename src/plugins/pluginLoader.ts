@@ -27,7 +27,7 @@ export class PluginLoader {
       // examplePlugin, // Uncomment to enable the example plugin
     ];
 
-    console.log("\n🔌 Loading plugins...");
+    console.log("🔌 Loading plugins...");
     
     for (const plugin of plugins) {
       try {
