@@ -1,5 +1,6 @@
 import { Client, Interaction } from "discord.js";
 import { EventHandler } from "../../types";
+import { handleError } from "../../../utils/errorHandler";
 
 export const interactionCreate: EventHandler = {
   name: "interactionCreate",
@@ -11,7 +12,7 @@ export const interactionCreate: EventHandler = {
     // Get the plugin manager from the client
     const pluginManager = (client as any).pluginManager;
     if (!pluginManager) {
-      console.error("Plugin manager not found on client");
+      handleError(new Error("Plugin manager not found on client"));
       return;
     }
 
@@ -25,7 +26,7 @@ export const interactionCreate: EventHandler = {
     try {
       await command.execute(interaction);
     } catch (error) {
-      console.error(`Error executing command ${interaction.commandName}:`, error);
+      handleError(error, `Error executing command ${interaction.commandName}`);
       
       const errorMessage = "There was an error while executing this command!";
       

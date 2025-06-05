@@ -60,6 +60,9 @@ src/
    ```env
    DISCORD_TOKEN=your_bot_token_here
    DISCORD_CLIENT_ID=your_client_id_here
+   BOT_OWNER_IDS=your_discord_user_id
+   OWNER_GUILD_IDS=optional_guild_ids_csv
+   LOG_TO_FILE=true
    ```
 
 4. Build the project:

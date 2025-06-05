@@ -18,6 +18,8 @@ export interface Plugin {
   events: EventHandler[];
   load: (client: Client) => Promise<void> | void;
   unload?: (client: Client) => Promise<void> | void;
+  guildIds?: string[];
+  global?: boolean;
 }
 
 export interface PluginManager {
@@ -25,5 +27,7 @@ export interface PluginManager {
   loadPlugin: (plugin: Plugin, client: Client) => Promise<void>;
   unloadPlugin: (pluginName: string, client: Client) => Promise<void>;
   getAllCommands: () => Command[];
+  getCommandsForGuild: (guildId: string) => Command[];
+  getGlobalCommands: () => Command[];
   getCommand: (commandName: string) => Command | undefined;
 }
