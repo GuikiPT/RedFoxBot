@@ -7,6 +7,7 @@ export const informationPlugin: Plugin = {
   description: "Information and utility commands",
   commands: [ping],
   events: [],
+  global: true,
   load: async (client: Client) => {
     console.log("Information plugin loaded - providing utility commands");
   }

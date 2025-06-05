@@ -62,6 +62,26 @@ export class DefaultPluginManager implements PluginManager {
     return commands;
   }
 
+  getCommandsForGuild(guildId: string): Command[] {
+    const commands: Command[] = [];
+    for (const plugin of this.plugins.values()) {
+      if (plugin.guildIds && plugin.guildIds.includes(guildId)) {
+        commands.push(...plugin.commands);
+      }
+    }
+    return commands;
+  }
+
+  getGlobalCommands(): Command[] {
+    const commands: Command[] = [];
+    for (const plugin of this.plugins.values()) {
+      if (plugin.global || (!plugin.guildIds && plugin.commands.length > 0 && plugin.global !== false)) {
+        commands.push(...plugin.commands);
+      }
+    }
+    return commands;
+  }
+
   getCommand(commandName: string): Command | undefined {
     for (const plugin of this.plugins.values()) {
       const command = plugin.commands.find(cmd => cmd.data.name === commandName);

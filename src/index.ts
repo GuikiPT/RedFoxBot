@@ -1,6 +1,8 @@
 import { Client } from "discord.js";
 import { config } from "./config/config";
 import { PluginLoader } from "./plugins";
+import "./logger";
+import { handleError } from "./utils/errorHandler";
 
 const client = new Client({
   intents: ["Guilds", "GuildMessages", "DirectMessages"],
@@ -8,6 +10,8 @@ const client = new Client({
 
 // Initialize plugin loader
 const pluginLoader = new PluginLoader(client);
+// Attach plugin loader to client for access in commands
+(client as any).pluginLoader = pluginLoader;
 
 // Initialize bot
 async function initializeBot() {
@@ -21,7 +25,7 @@ async function initializeBot() {
     await client.login(config.DISCORD_TOKEN);
     
   } catch (error) {
-    console.error("❌ Failed to initialize bot:", error);
+    handleError(error, "❌ Failed to initialize bot");
     process.exit(1);
   }
 }
@@ -39,6 +43,14 @@ process.on("SIGTERM", async () => {
   await pluginLoader.unloadAllPlugins();
   await client.destroy();
   process.exit(0);
+});
+
+process.on("unhandledRejection", (reason) => {
+  handleError(reason, "Unhandled promise rejection");
+});
+
+process.on("uncaughtException", (err) => {
+  handleError(err, "Uncaught exception");
 });
 
 initializeBot();

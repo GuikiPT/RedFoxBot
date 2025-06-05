@@ -3,6 +3,8 @@ import { Plugin } from "./types";
 import { DefaultPluginManager } from "./pluginManager";
 import { corePlugin } from "./core/corePlugin";
 import { informationPlugin } from "./information/informationPlugin";
+import { ownerPlugin } from "./owner/ownerPlugin";
+import { handleError } from "../utils/errorHandler";
 // import { examplePlugin } from "./example/examplePlugin";
 
 export class PluginLoader {
@@ -14,12 +16,14 @@ export class PluginLoader {
     this.pluginManager = new DefaultPluginManager();
     // Attach plugin manager to client for easy access
     (client as any).pluginManager = this.pluginManager;
+    (client as any).pluginLoader = this;
   }
 
   async loadAllPlugins(): Promise<void> {
     const plugins = [
       corePlugin,
       informationPlugin,
+      ownerPlugin,
       // examplePlugin, // Uncomment to enable the example plugin
     ];
 
@@ -29,7 +33,7 @@ export class PluginLoader {
       try {
         await this.pluginManager.loadPlugin(plugin, this.client);
       } catch (error) {
-        console.error(`❌ Failed to load plugin ${plugin.name}:`, error);
+        handleError(error, `❌ Failed to load plugin ${plugin.name}`);
       }
     }
 
@@ -45,7 +49,7 @@ export class PluginLoader {
       try {
         await this.pluginManager.unloadPlugin(pluginName, this.client);
       } catch (error) {
-        console.error(`❌ Failed to unload plugin ${pluginName}:`, error);
+        handleError(error, `❌ Failed to unload plugin ${pluginName}`);
       }
     }
 
