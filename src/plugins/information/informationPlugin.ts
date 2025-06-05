@@ -10,6 +10,6 @@ export const informationPlugin: Plugin = {
   events: [],
   global: true,
   load: async (client: Client) => {
-    console.log("Information plugin loaded - providing utility commands");
+    console.log("Information plugin loaded - utility commands ready");
   }
 };

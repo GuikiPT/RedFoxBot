@@ -10,13 +10,13 @@ export const examplePlugin: Plugin = {
   commands: [hello],
   events: [messageCreate],
   load: async (client: Client) => {
-    console.log("Example plugin loaded - demonstrating plugin capabilities");
+    console.log("Example plugin loaded - demonstrating capabilities");
     
     // You can add initialization logic here
     // For example: setting up databases, timers, etc.
   },
   unload: async (client: Client) => {
-    console.log("Example plugin unloaded - cleaning up resources");
+    console.log("Example plugin unloaded - resources cleaned up");
     
     // Cleanup logic here
     // For example: closing database connections, clearing timers, etc.

@@ -8,7 +8,7 @@ export const clientReady: EventHandler = {
   once: true,
   execute: async (client: Client) => {
     try {
-      console.log(`Discord bot is ready! 🤖`);
+      console.log(`🤖 RedFoxBot is now online!`);
       console.log(`Logged in as ${client.user?.tag}`);
 
       const { REST, Routes } = await import("discord.js");
@@ -28,9 +28,9 @@ export const clientReady: EventHandler = {
           await rest.put(Routes.applicationCommands(config.DISCORD_CLIENT_ID), {
             body: globalCommands,
           });
-          console.log("Global commands deployed");
+          console.log("✅ Global commands deployed successfully!");
         } else {
-          console.log("Global commands up to date");
+          console.log("ℹ️ Global commands are up to date");
         }
       }
 
@@ -51,7 +51,7 @@ export const clientReady: EventHandler = {
           await rest.put(Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), {
             body: guildCommands,
           });
-          console.log(`Commands deployed to ${guildId}`);
+          console.log(`✅ Commands deployed to ${guildId}!`);
         }
       }
     } catch (error) {

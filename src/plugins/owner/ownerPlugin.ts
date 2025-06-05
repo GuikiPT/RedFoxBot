@@ -11,7 +11,7 @@ export const ownerPlugin: Plugin = {
   commands: [reload, debug],
   events: [],
   async load(client: Client) {
-    console.log('Owner plugin loaded - maintenance commands available');
+    console.log('Owner plugin loaded - maintenance tools ready');
   },
   guildIds: config.OWNER_GUILD_IDS,
 };
