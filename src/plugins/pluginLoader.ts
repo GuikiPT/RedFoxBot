@@ -43,21 +43,36 @@ export class PluginLoader {
 
     const loadedPlugins = Array.from(this.pluginManager.plugins.values());
     if (loadedPlugins.length > 0) {
-      const lines = [
-        '┌─────────────┬─────────┬────────┬──────────┐',
-        '│ Name        │ Authors │ Events │ Commands │',
-        '├─────────────┼─────────┼────────┼──────────┤',
-      ];
+      const pluginInfos = loadedPlugins.map(plugin => ({
+        name: plugin.name,
+        authors: plugin.authors.join(', '),
+        events: plugin.events.length > 0
+          ? plugin.events.map(e => e.name).join(', ')
+          : '-',
+        commands: plugin.commands.length > 0
+          ? plugin.commands.map(c => c.data.name).join(', ')
+          : '-',
+      }));
 
-      for (const plugin of loadedPlugins) {
-        const name = plugin.name.padEnd(11);
-        const authors = plugin.authors.join(', ').padEnd(7);
-        const events = plugin.events.length.toString().padStart(6);
-        const commands = plugin.commands.length.toString().padStart(8);
-        lines.push(`│ ${name} │ ${authors} │${events} │${commands} │`);
+      const nameWidth = Math.max('Name'.length, ...pluginInfos.map(i => i.name.length));
+      const authorsWidth = Math.max('Authors'.length, ...pluginInfos.map(i => i.authors.length));
+      const eventsWidth = Math.max('Events'.length, ...pluginInfos.map(i => i.events.length));
+      const commandsWidth = Math.max('Commands'.length, ...pluginInfos.map(i => i.commands.length));
+
+      const top = `┌${'─'.repeat(nameWidth + 2)}┬${'─'.repeat(authorsWidth + 2)}┬${'─'.repeat(eventsWidth + 2)}┬${'─'.repeat(commandsWidth + 2)}┐`;
+      const header = `│ ${'Name'.padEnd(nameWidth)} │ ${'Authors'.padEnd(authorsWidth)} │ ${'Events'.padEnd(eventsWidth)} │ ${'Commands'.padEnd(commandsWidth)} │`;
+      const mid = `├${'─'.repeat(nameWidth + 2)}┼${'─'.repeat(authorsWidth + 2)}┼${'─'.repeat(eventsWidth + 2)}┼${'─'.repeat(commandsWidth + 2)}┤`;
+      const bottom = `└${'─'.repeat(nameWidth + 2)}┴${'─'.repeat(authorsWidth + 2)}┴${'─'.repeat(eventsWidth + 2)}┴${'─'.repeat(commandsWidth + 2)}┘`;
+
+      const lines = [top, header, mid];
+
+      for (const info of pluginInfos) {
+        lines.push(
+          `│ ${info.name.padEnd(nameWidth)} │ ${info.authors.padEnd(authorsWidth)} │ ${info.events.padEnd(eventsWidth)} │ ${info.commands.padEnd(commandsWidth)} │`
+        );
       }
 
-      lines.push('└─────────────┴─────────┴────────┴──────────┘');
+      lines.push(bottom);
       console.log(`\n${lines.join('\n')}\n`);
     }
   }
