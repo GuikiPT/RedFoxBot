@@ -7,6 +7,7 @@ import { guildCreate } from "./events/guildCreate";
 export const corePlugin: Plugin = {
   name: "core",
   description: "Core functionality for the Discord bot",
+  authors: ["GuikiPT"],
   commands: [],
   events: [clientReady, interactionCreate, guildCreate],
   global: true,

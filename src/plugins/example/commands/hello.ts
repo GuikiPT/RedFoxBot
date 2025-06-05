@@ -12,14 +12,18 @@ export const hello: Command = {
     ),
     
   execute: async (interaction: ChatInputCommandInteraction) => {
-    const user = interaction.options.getUser("user") || interaction.user;
-    
-    const embed = new EmbedBuilder()
-      .setColor(0x0099FF)
-      .setTitle("👋 Hello!")
-      .setDescription(`Hello ${user}! Hope you're having a great day! 🌟`)
-      .setTimestamp();
+    try {
+      const user = interaction.options.getUser("user") || interaction.user;
 
-    await interaction.reply({ embeds: [embed] });
+      const embed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle("👋 Hello!")
+        .setDescription(`Hello ${user}! Hope you're having a great day! 🌟`)
+        .setTimestamp();
+
+      await interaction.reply({ embeds: [embed] });
+    } catch (error) {
+      console.error('Hello command failed:', error);
+    }
   }
 };

@@ -7,8 +7,12 @@ export const ping: Command = {
     .setDescription("Replies with Pong!"),
     
   execute: async (interaction: ChatInputCommandInteraction) => {
-    const sent = await interaction.reply({ content: "Pinging...", fetchReply: true });
-    const ping = sent.createdTimestamp - interaction.createdTimestamp;
-    await interaction.editReply(`🏓 Pong! Bot latency: ${ping}ms`);
+    try {
+      const sent = await interaction.reply({ content: "Pinging...", fetchReply: true });
+      const ping = sent.createdTimestamp - interaction.createdTimestamp;
+      await interaction.editReply(`🏓 Pong! Bot latency: ${ping}ms`);
+    } catch (error) {
+      console.error('Ping command failed:', error);
+    }
   }
 };
