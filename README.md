@@ -102,6 +102,7 @@ See `src/plugins/README.md` for detailed plugin development instructions.
 - `npm run build` - Build the TypeScript project
 - `npm start` - Start the bot
 - `npm run dev` - Start in development mode (if configured)
+- `npm run deploy` - Deploy slash commands without starting the bot
 
 ## Architecture
 

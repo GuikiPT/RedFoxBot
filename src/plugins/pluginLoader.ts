@@ -27,7 +27,7 @@ export class PluginLoader {
       // examplePlugin, // Uncomment to enable the example plugin
     ];
 
-    console.log("🔌 Loading plugins...");
+    console.log("\n🔌 Loading plugins...");
     
     for (const plugin of plugins) {
       try {
@@ -37,23 +37,28 @@ export class PluginLoader {
       }
     }
 
-    console.log(`✅ Loaded ${this.pluginManager.plugins.size} plugins successfully`);
+    console.log(
+      `✅ Loaded ${this.pluginManager.plugins.size} plugins successfully`
+    );
 
     const loadedPlugins = Array.from(this.pluginManager.plugins.values());
     if (loadedPlugins.length > 0) {
-      console.log('┌─────────────┬─────────┬────────┬──────────┐');
-      console.log('│ Name        │ Authors │ Events │ Commands │');
-      console.log('├─────────────┼─────────┼────────┼──────────┤');
-      
+      const lines = [
+        '┌─────────────┬─────────┬────────┬──────────┐',
+        '│ Name        │ Authors │ Events │ Commands │',
+        '├─────────────┼─────────┼────────┼──────────┤',
+      ];
+
       for (const plugin of loadedPlugins) {
         const name = plugin.name.padEnd(11);
         const authors = plugin.authors.join(', ').padEnd(7);
         const events = plugin.events.length.toString().padStart(6);
         const commands = plugin.commands.length.toString().padStart(8);
-        console.log(`│ ${name} │ ${authors} │${events} │${commands} │`);
+        lines.push(`│ ${name} │ ${authors} │${events} │${commands} │`);
       }
-      
-      console.log('└─────────────┴─────────┴────────┴──────────┘');
+
+      lines.push('└─────────────┴─────────┴────────┴──────────┘');
+      console.log(`\n${lines.join('\n')}\n`);
     }
   }
 
