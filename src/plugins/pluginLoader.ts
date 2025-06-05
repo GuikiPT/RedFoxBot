@@ -4,6 +4,7 @@ import { DefaultPluginManager } from "./pluginManager";
 import { corePlugin } from "./core/corePlugin";
 import { informationPlugin } from "./information/informationPlugin";
 import { ownerPlugin } from "./owner/ownerPlugin";
+import { musicPlugin } from "./music/musicPlugin";
 import { handleError } from "../utils/errorHandler";
 // import { examplePlugin } from "./example/examplePlugin";
 
@@ -24,6 +25,7 @@ export class PluginLoader {
       corePlugin,
       informationPlugin,
       ownerPlugin,
+      musicPlugin,
       // examplePlugin, // Uncomment to enable the example plugin
     ];
 
