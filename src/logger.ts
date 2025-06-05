@@ -11,7 +11,10 @@ if (!fs.existsSync(logDir)) {
 const logToFile = process.env.LOG_TO_FILE === 'true';
 
 betterLogging(console, {
-  format: ctx => `${Theme.dark.base(`[${moment().format('HH:mm:ss')}]`)} ${Theme.dark.base(`[${moment().format('L')}]`)} ${ctx.type} >> ${ctx.msg}`,
+  format: (ctx) => {
+    const timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
+    return `${Theme.dark.base(`[${timestamp}]`)} ${ctx.type} ${ctx.msg}`;
+  },
   saveToFile: logToFile ? path.join(logDir, 'log.txt') : null,
 });
 

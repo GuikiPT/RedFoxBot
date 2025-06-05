@@ -28,7 +28,7 @@ type DeployCommandsProps = {
 
 export async function deployCommands({ guildId }: DeployCommandsProps) {
   try {
-    console.log(`Deploying commands to guild ${guildId}...`);
+    console.log(`🚀 Deploying commands to guild ${guildId}...`);
 
     const tempPluginManager = createPluginManagerWithPlugins();
     const commands = tempPluginManager
@@ -40,7 +40,7 @@ export async function deployCommands({ guildId }: DeployCommandsProps) {
       await rest.put(Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), {
         body: commands,
       });
-      console.log(`✅ Commands deployed to guild ${guildId}`);
+      console.log(`✅ Commands deployed to guild ${guildId}!`);
     } else {
       console.log(`ℹ️ Commands for guild ${guildId} are up to date`);
     }
@@ -51,7 +51,7 @@ export async function deployCommands({ guildId }: DeployCommandsProps) {
 
 export async function deployGlobalCommands() {
   try {
-    console.log("Deploying global commands...");
+    console.log("🚀 Deploying global commands...");
 
     const tempPluginManager = createPluginManagerWithPlugins();
     const commands = tempPluginManager.getGlobalCommands().map((cmd) => cmd.data);
@@ -61,7 +61,7 @@ export async function deployGlobalCommands() {
       await rest.put(Routes.applicationCommands(config.DISCORD_CLIENT_ID), {
         body: commands,
       });
-      console.log("✅ Global commands deployed");
+      console.log("✅ Global commands deployed!");
     } else {
       console.log("ℹ️ Global commands are up to date");
     }
@@ -80,7 +80,7 @@ export async function deployAllCommands() {
     await rest.put(Routes.applicationCommands(config.DISCORD_CLIENT_ID), {
       body: globalCmds,
     });
-    console.log("✅ Global commands deployed");
+    console.log("✅ Global commands deployed!");
   } else {
     console.log("ℹ️ Global commands are up to date");
   }
@@ -101,7 +101,7 @@ export async function deployAllCommands() {
         Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId),
         { body: cmds }
       );
-      console.log(`✅ Commands deployed to guild ${guildId}`);
+      console.log(`✅ Commands deployed to guild ${guildId}!`);
     } else {
       console.log(`ℹ️ Commands for guild ${guildId} are up to date`);
     }

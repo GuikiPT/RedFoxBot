@@ -16,7 +16,7 @@ const pluginLoader = new PluginLoader(client);
 // Initialize bot
 async function initializeBot() {
   try {
-    console.log("🚀 Starting RedFoxBot...");
+    console.log("🚀 Launching RedFoxBot, hang tight...");
     
     // Load all plugins
     await pluginLoader.loadAllPlugins();
@@ -32,14 +32,14 @@ async function initializeBot() {
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
-  console.log("\n🛑 Shutting down bot...");
+  console.log("\n🛑 Shutting down RedFoxBot...");
   await pluginLoader.unloadAllPlugins();
   await client.destroy();
   process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
-  console.log("\n🛑 Shutting down bot...");
+  console.log("\n🛑 Shutting down RedFoxBot...");
   await pluginLoader.unloadAllPlugins();
   await client.destroy();
   process.exit(0);

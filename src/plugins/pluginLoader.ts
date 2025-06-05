@@ -27,7 +27,7 @@ export class PluginLoader {
       // examplePlugin, // Uncomment to enable the example plugin
     ];
 
-    console.log("🔌 Loading plugins...");
+    console.log("🔌 Loading plugins, please wait...");
     
     for (const plugin of plugins) {
       try {
@@ -38,7 +38,7 @@ export class PluginLoader {
     }
 
     console.log(
-      `✅ Loaded ${this.pluginManager.plugins.size} plugins successfully`
+      `✅ All plugins loaded! (${this.pluginManager.plugins.size} total)`
     );
 
     const loadedPlugins = Array.from(this.pluginManager.plugins.values());
@@ -73,12 +73,12 @@ export class PluginLoader {
       }
 
       lines.push(bottom);
-      console.log(`\n${lines.join('\n')}\n`);
+      console.log(`\nLoaded plugins:\n${lines.join('\n')}\n`);
     }
   }
 
   async unloadAllPlugins(): Promise<void> {
-    console.log("🔌 Unloading plugins...");
+    console.log("🔌 Unloading all plugins...");
     
     const pluginNames = Array.from(this.pluginManager.plugins.keys());
     
@@ -90,7 +90,7 @@ export class PluginLoader {
       }
     }
 
-    console.log("✅ All plugins unloaded");
+    console.log("✅ Successfully unloaded all plugins");
   }
 
   getPluginManager(): DefaultPluginManager {

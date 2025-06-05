@@ -12,6 +12,6 @@ export const corePlugin: Plugin = {
   events: [clientReady, interactionCreate, guildCreate],
   global: true,
   load: async (client: Client) => {
-    console.log("Core plugin loaded - handling basic bot functionality");
+    console.log("Core plugin loaded - handling essential bot features");
   }
 };

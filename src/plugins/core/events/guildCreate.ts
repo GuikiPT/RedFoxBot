@@ -6,7 +6,7 @@ import { commandsChanged } from "../../../utils/commandCache";
 export const guildCreate: EventHandler = {
   name: "guildCreate",
   execute: async (client: Client, guild: Guild) => {
-    console.log(`Bot joined new guild: ${guild.name} (${guild.id})`);
+    console.log(`🎉 Joined guild: ${guild.name} (${guild.id})`);
     try {
       // Get commands from the plugin manager attached to the client
       const pluginManager = (client as any).pluginManager;
@@ -26,7 +26,7 @@ export const guildCreate: EventHandler = {
             body: commands,
           });
 
-          console.log(`Commands deployed to ${guild.name}`);
+          console.log(`✅ Commands deployed to ${guild.name}!`);
         }
       }
     } catch (error) {
