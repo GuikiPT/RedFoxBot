@@ -9,6 +9,7 @@ A modern Discord bot built with TypeScript and a modular plugin architecture.
 - 🚀 **Slash Commands**: Modern Discord slash command support
 - 🎯 **Event Handling**: Flexible event system through plugins
 - 🛠️ **Easy Development**: Hot-reloadable plugin system
+- 🎵 **Music Playback**: Lavalink-powered music commands
 
 ## Project Structure
 
@@ -63,6 +64,10 @@ src/
    BOT_OWNER_IDS=your_discord_user_id
    OWNER_GUILD_IDS=optional_guild_ids_csv
    LOG_TO_FILE=true
+   LAVALINK_HOST=localhost
+   LAVALINK_PORT=2333
+   LAVALINK_PASSWORD=youshallnotpass
+   LAVALINK_SECURE=false
    ```
 
 4. Build the project:
@@ -96,6 +101,13 @@ See `src/plugins/README.md` for detailed plugin development instructions.
 
 - `/ping` - Check bot latency and responsiveness
 - `/hello` - Greet a user with a friendly message (example plugin)
+- `/play` - Play music from a query or URL
+- `/skip` - Skip the current track
+- `/pause` - Pause playback
+- `/resume` - Resume playback
+- `/queue` - View the queue
+- `/nowplaying` - Show the current track
+- `/stop` - Stop playback and leave the channel
 
 ## Scripts
 
