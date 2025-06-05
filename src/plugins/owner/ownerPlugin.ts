@@ -7,6 +7,7 @@ import { config } from '../../config/config';
 export const ownerPlugin: Plugin = {
   name: 'owner',
   description: 'Owner only commands',
+  authors: ['GuikiPT'],
   commands: [reload, debug],
   events: [],
   async load(client: Client) {

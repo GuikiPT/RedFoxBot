@@ -38,6 +38,14 @@ export class PluginLoader {
     }
 
     console.log(`✅ Loaded ${this.pluginManager.plugins.size} plugins successfully`);
+
+    const tableData = Array.from(this.pluginManager.plugins.values()).map(p => ({
+      Name: p.name,
+      Authors: p.authors.join(', '),
+      Events: p.events.length,
+      Commands: p.commands.length,
+    }));
+    console.table(tableData);
   }
 
   async unloadAllPlugins(): Promise<void> {

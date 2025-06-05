@@ -14,6 +14,7 @@ export interface EventHandler {
 export interface Plugin {
   name: string;
   description: string;
+  authors: string[];
   commands: Command[];
   events: EventHandler[];
   load: (client: Client) => Promise<void> | void;

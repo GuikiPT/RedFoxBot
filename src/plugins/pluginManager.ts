@@ -23,8 +23,12 @@ export class DefaultPluginManager implements PluginManager {
       }
     }
 
-    // Call plugin load method
-    await plugin.load(client);
+    try {
+      await plugin.load(client);
+    } catch (error) {
+      console.error(`Error loading plugin ${plugin.name}:`, error);
+      return;
+    }
 
     this.plugins.set(plugin.name, plugin);
     this.listeners.set(plugin.name, registered);
@@ -45,9 +49,12 @@ export class DefaultPluginManager implements PluginManager {
     }
     this.listeners.delete(pluginName);
 
-    // Call plugin unload method if available
     if (plugin.unload) {
-      await plugin.unload(client);
+      try {
+        await plugin.unload(client);
+      } catch (error) {
+        console.error(`Error unloading plugin ${pluginName}:`, error);
+      }
     }
 
     this.plugins.delete(pluginName);

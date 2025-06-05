@@ -5,6 +5,7 @@ import { ping } from "./commands/ping";
 export const informationPlugin: Plugin = {
   name: "information",
   description: "Information and utility commands",
+  authors: ["GuikiPT"],
   commands: [ping],
   events: [],
   global: true,

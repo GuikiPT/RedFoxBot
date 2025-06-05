@@ -6,6 +6,7 @@ import { messageCreate } from "./events/messageCreate";
 export const examplePlugin: Plugin = {
   name: "example",
   description: "Example plugin demonstrating commands and events",
+  authors: ["GuikiPT"],
   commands: [hello],
   events: [messageCreate],
   load: async (client: Client) => {
