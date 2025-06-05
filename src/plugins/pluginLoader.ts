@@ -39,13 +39,22 @@ export class PluginLoader {
 
     console.log(`✅ Loaded ${this.pluginManager.plugins.size} plugins successfully`);
 
-    const tableData = Array.from(this.pluginManager.plugins.values()).map(p => ({
-      Name: p.name,
-      Authors: p.authors.join(', '),
-      Events: p.events.length,
-      Commands: p.commands.length,
-    }));
-    console.table(tableData);
+    const loadedPlugins = Array.from(this.pluginManager.plugins.values());
+    if (loadedPlugins.length > 0) {
+      console.log('┌─────────────┬─────────┬────────┬──────────┐');
+      console.log('│ Name        │ Authors │ Events │ Commands │');
+      console.log('├─────────────┼─────────┼────────┼──────────┤');
+      
+      for (const plugin of loadedPlugins) {
+        const name = plugin.name.padEnd(11);
+        const authors = plugin.authors.join(', ').padEnd(7);
+        const events = plugin.events.length.toString().padStart(6);
+        const commands = plugin.commands.length.toString().padStart(8);
+        console.log(`│ ${name} │ ${authors} │${events} │${commands} │`);
+      }
+      
+      console.log('└─────────────┴─────────┴────────┴──────────┘');
+    }
   }
 
   async unloadAllPlugins(): Promise<void> {
