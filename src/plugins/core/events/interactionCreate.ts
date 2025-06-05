@@ -4,7 +4,7 @@ import { EventHandler } from "../../types";
 export const interactionCreate: EventHandler = {
   name: "interactionCreate",
   execute: async (client: Client, interaction: Interaction) => {
-    if (!interaction.isCommand()) {
+    if (!interaction.isChatInputCommand()) {
       return;
     }
 

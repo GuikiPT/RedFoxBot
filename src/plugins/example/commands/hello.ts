@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { Command } from "../../types";
 
 export const hello: Command = {
@@ -11,8 +11,8 @@ export const hello: Command = {
         .setRequired(false)
     ),
     
-  execute: async (interaction: CommandInteraction) => {
-    const user = interaction.options.get("user")?.user || interaction.user;
+  execute: async (interaction: ChatInputCommandInteraction) => {
+    const user = interaction.options.getUser("user") || interaction.user;
     
     const embed = new EmbedBuilder()
       .setColor(0x0099FF)
