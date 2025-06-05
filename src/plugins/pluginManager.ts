@@ -3,6 +3,7 @@ import { Plugin, PluginManager, Command } from "./types";
 
 export class DefaultPluginManager implements PluginManager {
   public plugins = new Map<string, Plugin>();
+  private listeners = new Map<string, { event: string; handler: (...args: any[]) => void }[]>();
 
   async loadPlugin(plugin: Plugin, client: Client): Promise<void> {
     if (this.plugins.has(plugin.name)) {
@@ -10,12 +11,15 @@ export class DefaultPluginManager implements PluginManager {
       return;
     }
 
-    // Register events
+    const registered: { event: string; handler: (...args: any[]) => void }[] = [];
+    // Register events and keep references to handlers
     for (const event of plugin.events) {
+      const handler = (...args: any[]) => event.execute(client, ...args);
+      registered.push({ event: event.name, handler });
       if (event.once) {
-        client.once(event.name, (...args) => event.execute(client, ...args));
+        client.once(event.name, handler);
       } else {
-        client.on(event.name, (...args) => event.execute(client, ...args));
+        client.on(event.name, handler);
       }
     }
 
@@ -23,6 +27,7 @@ export class DefaultPluginManager implements PluginManager {
     await plugin.load(client);
 
     this.plugins.set(plugin.name, plugin);
+    this.listeners.set(plugin.name, registered);
     console.log(`✅ Plugin ${plugin.name} loaded successfully`);
   }
 
@@ -33,10 +38,12 @@ export class DefaultPluginManager implements PluginManager {
       return;
     }
 
-    // Remove events
-    for (const event of plugin.events) {
-      client.removeAllListeners(event.name);
+    // Remove events registered for this plugin only
+    const listeners = this.listeners.get(pluginName) || [];
+    for (const { event, handler } of listeners) {
+      client.off(event, handler);
     }
+    this.listeners.delete(pluginName);
 
     // Call plugin unload method if available
     if (plugin.unload) {
