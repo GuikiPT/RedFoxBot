@@ -3,6 +3,7 @@ import { config } from "./config/config";
 import { PluginLoader } from "./plugins";
 import "./logger";
 import { handleError } from "./utils/errorHandler";
+import { initDatabases } from "./db";
 
 const client = new Client({
   intents: ["Guilds", "GuildMessages", "DirectMessages"],
@@ -17,6 +18,9 @@ const pluginLoader = new PluginLoader(client);
 async function initializeBot() {
   try {
     console.log("🚀 Launching RedFoxBot, hang tight...");
+
+    // Initialize databases
+    await initDatabases();
     
     // Load all plugins
     await pluginLoader.loadAllPlugins();

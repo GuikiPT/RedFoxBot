@@ -9,6 +9,7 @@ A modern Discord bot built with TypeScript and a modular plugin architecture.
 - 🚀 **Slash Commands**: Modern Discord slash command support
 - 🎯 **Event Handling**: Flexible event system through plugins
 - 🛠️ **Easy Development**: Hot-reloadable plugin system
+- 🗄️ **Database Support**: Sequelize ORM with better-sqlite3 and optional MariaDB
 
 ## Project Structure
 
@@ -59,11 +60,18 @@ src/
 3. Create a `.env` file with your Discord credentials:
    ```env
    DISCORD_TOKEN=your_bot_token_here
-   DISCORD_CLIENT_ID=your_client_id_here
-   BOT_OWNER_IDS=your_discord_user_id
-   OWNER_GUILD_IDS=optional_guild_ids_csv
-   LOG_TO_FILE=true
-   ```
+  DISCORD_CLIENT_ID=your_client_id_here
+  BOT_OWNER_IDS=your_discord_user_id
+  OWNER_GUILD_IDS=optional_guild_ids_csv
+  LOG_TO_FILE=true
+  SQLITE_PATH=./data/database.sqlite
+  # Optional MariaDB backup database
+  MARIADB_HOST=localhost
+  MARIADB_PORT=3306
+  MARIADB_DB=redfoxbot
+  MARIADB_USER=user
+  MARIADB_PASSWORD=password
+  ```
 
 4. Build the project:
    ```bash

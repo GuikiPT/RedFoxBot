@@ -8,10 +8,28 @@ interface Config {
   BOT_OWNER_IDS: string[];
   OWNER_GUILD_IDS?: string[];
   LOG_TO_FILE: boolean;
+  SQLITE_PATH: string;
+  MARIADB_HOST?: string;
+  MARIADB_PORT?: number;
+  MARIADB_DB?: string;
+  MARIADB_USER?: string;
+  MARIADB_PASSWORD?: string;
 }
 
 function validateConfig(): Config {
-  const { DISCORD_TOKEN, DISCORD_CLIENT_ID, BOT_OWNER_IDS, OWNER_GUILD_IDS, LOG_TO_FILE } = process.env;
+  const {
+    DISCORD_TOKEN,
+    DISCORD_CLIENT_ID,
+    BOT_OWNER_IDS,
+    OWNER_GUILD_IDS,
+    LOG_TO_FILE,
+    SQLITE_PATH,
+    MARIADB_HOST,
+    MARIADB_PORT,
+    MARIADB_DB,
+    MARIADB_USER,
+    MARIADB_PASSWORD
+  } = process.env;
   
   const requiredVars = ['DISCORD_TOKEN', 'DISCORD_CLIENT_ID'] as const;
   const missingVars = requiredVars.filter(varName => !process.env[varName]);
@@ -29,6 +47,12 @@ function validateConfig(): Config {
     BOT_OWNER_IDS: BOT_OWNER_IDS ? BOT_OWNER_IDS.split(',') : [],
     OWNER_GUILD_IDS: OWNER_GUILD_IDS ? OWNER_GUILD_IDS.split(',') : undefined,
     LOG_TO_FILE: LOG_TO_FILE === 'true',
+    SQLITE_PATH: SQLITE_PATH || 'database.sqlite',
+    MARIADB_HOST,
+    MARIADB_PORT: MARIADB_PORT ? parseInt(MARIADB_PORT, 10) : undefined,
+    MARIADB_DB,
+    MARIADB_USER,
+    MARIADB_PASSWORD,
   };
 }
 
