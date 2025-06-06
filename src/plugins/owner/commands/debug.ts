@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { Command } from '../../types';
-import { config } from '../../../config/config';
+import { isBotOwner } from '../../../utils/auth';
 
 export const debug: Command = {
   data: new SlashCommandBuilder()
@@ -8,7 +8,7 @@ export const debug: Command = {
     .setDescription('Show debug information'),
   async execute(interaction: ChatInputCommandInteraction) {
     try {
-      if (!config.BOT_OWNER_IDS.includes(interaction.user.id)) {
+      if (!isBotOwner(interaction.user.id)) {
         await interaction.reply({ content: 'Only bot owners can use this command.', ephemeral: true });
         return;
       }
