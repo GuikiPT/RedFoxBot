@@ -30,7 +30,7 @@ export const clientReady: EventHandler = {
           });
           console.log("✅ Global commands deployed successfully!");
         } else {
-          console.log("ℹ️ Global commands are up to date");
+          console.log("ℹ️  Global commands are up to date");
         }
       }
 

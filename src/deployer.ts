@@ -63,7 +63,7 @@ export async function deployGlobalCommands() {
       });
       console.log("✅ Global commands deployed!");
     } else {
-      console.log("ℹ️ Global commands are up to date");
+      console.log("ℹ️  Global commands are up to date");
     }
   } catch (error) {
     handleError(error, 'deployGlobalCommands');
@@ -82,7 +82,7 @@ export async function deployAllCommands() {
     });
     console.log("✅ Global commands deployed!");
   } else {
-    console.log("ℹ️ Global commands are up to date");
+    console.log("ℹ️  Global commands are up to date");
   }
 
   // Guild specific commands
