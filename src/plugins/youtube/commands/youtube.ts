@@ -111,7 +111,7 @@ export const youtube: Command = {
         if (result.channelId) {
           const channelInfo = await XMLTubeInfoFetcher(result.channelId);
 
-          const titleComponent = new TextDisplayBuilder().setContent('✅ YouTube Channel Found');
+          const titleComponent = new TextDisplayBuilder().setContent('### ✅ YouTube Channel Found');
           let descContent = `**Input:** ${handle}\n**Channel ID:** ${result.channelId}\n**Method:** ${result.method || 'unknown'}`;
           if (channelInfo) {
             descContent += `\n**Channel Name:** ${channelInfo.author.name}\n**Channel URL:** ${channelInfo.author.url}\n**Videos Found:** ${channelInfo.videos.length}`;
@@ -135,7 +135,7 @@ export const youtube: Command = {
             flags: MessageFlags.IsComponentsV2,
           });
         } else {
-          const titleComponent = new TextDisplayBuilder().setContent('❌ Channel Not Found');
+          const titleComponent = new TextDisplayBuilder().setContent('### ❌ Channel Not Found');
           const descComponent = new TextDisplayBuilder().setContent(
             `${result.error || 'Could not resolve the YouTube handle'}\n\n**Input:** ${handle}`,
           );
@@ -233,7 +233,7 @@ export const youtube: Command = {
           });
         }
 
-        const titleComponent = new TextDisplayBuilder().setContent('✅ Successfully Subscribed');
+        const titleComponent = new TextDisplayBuilder().setContent('### ✅ Successfully Subscribed');
         let descContent = `**Channel:** ${channelName || 'Unknown'}\n**Channel ID:** ${channelId}\n**Discord Channel:** <#${discordChannel.id}>`;
         if (mentionRole) {
           descContent += `\n**Mention Role:** ${formatRoleMention(mentionRole.id, interaction.guildId)}`;
@@ -293,7 +293,7 @@ export const youtube: Command = {
           await existing.destroy();
           const channelInfo = await XMLTubeInfoFetcher(channelId);
           const channelName = channelInfo?.author.name;
-          const titleComponent = new TextDisplayBuilder().setContent('✅ Unsubscribed');
+          const titleComponent = new TextDisplayBuilder().setContent('###✅ Unsubscribed');
           const descComponent = new TextDisplayBuilder().setContent(
             `**Channel:** ${channelName || 'Unknown'}\n**Channel ID:** ${channelId}`,
           );
@@ -311,7 +311,7 @@ export const youtube: Command = {
             flags: MessageFlags.IsComponentsV2,
           });
         } else {
-          const titleComponent = new TextDisplayBuilder().setContent('❌ Subscription Not Found');
+          const titleComponent = new TextDisplayBuilder().setContent('### ❌ Subscription Not Found');
           const descComponent = new TextDisplayBuilder().setContent(
             `No subscription found for ${channelId}.`,
           );
@@ -342,14 +342,14 @@ export const youtube: Command = {
         let descComponent: TextDisplayBuilder;
 
         if (!existing) {
-          titleComponent = new TextDisplayBuilder().setContent('❌ Subscription Not Found');
+          titleComponent = new TextDisplayBuilder().setContent('### ❌ Subscription Not Found');
           descComponent = new TextDisplayBuilder().setContent(
             `No subscription found for ${channelId}.`,
           );
         } else {
           existing.mentionRoleId = role?.id ?? null;
           await existing.save();
-          titleComponent = new TextDisplayBuilder().setContent('✅ Updated Mention Role');
+          titleComponent = new TextDisplayBuilder().setContent('### ✅ Updated Mention Role');
           const mentionText = role ? formatRoleMention(role.id, interaction.guildId) : 'None';
           descComponent = new TextDisplayBuilder().setContent(
             `**Channel ID:** ${channelId}\n**Mention Role:** ${mentionText}`,
@@ -384,7 +384,7 @@ export const youtube: Command = {
             ? formatRoleMention(existing.mentionRoleId, existing.guildId)
             : 'None';
 
-          const titleComponent = new TextDisplayBuilder().setContent('📺 Current Subscription');
+          const titleComponent = new TextDisplayBuilder().setContent('### 📺 Current Subscription');
           let descContent = `**Channel Name:** ${channelName}\n**Channel ID:** ${existing.youtubeChannelId}`;
           if (channelUrl) descContent += `\n**Channel URL:** ${channelUrl}`;
           descContent += `\n**Discord Channel:** <#${existing.discordChannelId}>\n**Mention Role:** ${mentionText}`;
