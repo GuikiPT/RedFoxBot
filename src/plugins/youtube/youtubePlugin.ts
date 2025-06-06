@@ -3,8 +3,13 @@ import {
   ButtonBuilder,
   ButtonStyle,
   Client,
-  EmbedBuilder,
-  GuildTextBasedChannel
+  ContainerBuilder,
+  GuildTextBasedChannel,
+  MediaGalleryBuilder,
+  MediaGalleryItemBuilder,
+  SeparatorBuilder,
+  SeparatorSpacingSize,
+  TextDisplayBuilder,
 } from 'discord.js';
 import { Plugin } from '../types';
 import { youtube } from './commands/youtube';
@@ -36,51 +41,109 @@ async function checkSubscriptions(client: Client) {
       }
 
       if (sub.lastVideoId === latest.video_id) {
-        console.log(`[YouTube Plugin] No new video for channel: ${info.author.name} (latest: ${latest.video_id})`);
+        console.log(
+          `[YouTube Plugin] No new video for channel: ${info.author.name} (latest: ${latest.video_id})`
+        );
         continue;
       }
 
-      console.log(`[YouTube Plugin] New video detected for channel: ${info.author.name} - ${latest.title}`);
+      console.log(
+        `[YouTube Plugin] New video detected for channel: ${info.author.name} - ${latest.title}`
+      );
       const channel = await client.channels.fetch(sub.discordChannelId).catch(() => null);
       if (channel && channel.isTextBased()) {
         try {
-          const embed = new EmbedBuilder()
-            .setTitle(latest.title?.substring(0, 256) || 'New Video')
-            .setURL(latest.url)
-            .setTimestamp(new Date(latest.published_at * 1000));
-
-          if (latest.description) {
-            embed.setDescription(latest.description.substring(0, 4096));
-          }
-
-          if (latest.thumbnails?.max_res_default) {
-            embed.setImage(latest.thumbnails.max_res_default);
-          }
-
-          const mention = sub.mentionRoleId ? `<@&${sub.mentionRoleId}> ` : '';
-          const content = `${mention}New video from ${info.author.name}!`;
-
-          const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-              .setLabel('Watch on YouTube')
-              .setStyle(ButtonStyle.Link)
-              .setURL(latest.url)
+          // 1) Build the "title" and "subtitle" text displays
+          const titleComponent = new TextDisplayBuilder().setContent(
+            `## [${latest.title}](${latest.url})`
+          );
+          const subtitleComponent = new TextDisplayBuilder().setContent(
+            `New video from ${info.author.name}`
           );
 
-          await (channel as GuildTextBasedChannel).send({ content, embeds: [embed], components: [row] });
+          // 2) Build the media gallery item (thumbnail)
+          const mediaItem = new MediaGalleryItemBuilder()
+            .setURL(latest.thumbnails?.max_res_default || '')
+            .setDescription(`${latest.title} Thumbnail`);
+
+          // 3) Build the two link-buttons: "Open Video" and "Open Channel"
+          const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setStyle(ButtonStyle.Link)
+              .setLabel('Open Video')
+              .setEmoji({ name: '📽️' })
+              .setURL(latest.url),
+            new ButtonBuilder()
+              .setStyle(ButtonStyle.Link)
+              .setLabel('Open Channel')
+              .setEmoji({ name: '📽️' })
+              .setURL(info.author.url)
+          );
+
+          // 4) Compose the ContainerBuilder with separators, text, media gallery, and a placeholder for the button row
+          const containerComponent = new ContainerBuilder()
+            // Separator above the title
+            .addSeparatorComponents(
+              new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(true)
+            )
+            // Title line (markdown link)
+            .addTextDisplayComponents(titleComponent)
+            // Subtitle line ("New video from …")
+            .addTextDisplayComponents(subtitleComponent)
+            // Divider between subtitle and thumbnail gallery
+            .addSeparatorComponents(
+              new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            )
+            // Media gallery with one thumbnail
+            .addMediaGalleryComponents(
+              new MediaGalleryBuilder().addItems(mediaItem)
+            )
+            // Divider between gallery and buttons
+            .addSeparatorComponents(
+              new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true)
+            );
+          
+          // 5) Determine mention text (@everyone or role mention)
+          let mention = '';
+          if (sub.mentionRoleId) {
+            if (sub.mentionRoleId === sub.guildId) {
+              mention = '@everyone ';
+            } else {
+              mention = `<@&${sub.mentionRoleId}> `;
+            }
+          }
+
+          // 6) Send the message with content, the v2 container, and the v1 action row of buttons
+          await (channel as GuildTextBasedChannel).send({
+            content: mention,
+            components: [containerComponent, buttonRow],
+          });
+
+          // 7) Update lastVideoId
           sub.lastVideoId = latest.video_id;
           await sub.save();
-          console.log(`[YouTube Plugin] Successfully notified about new video: ${latest.title}`);
+          console.log(
+            `[YouTube Plugin] Successfully notified about new video: ${latest.title}`
+          );
         } catch (sendError) {
-          console.error(`[YouTube Plugin] Failed to send notification for channel ${sub.youtubeChannelId}:`, sendError);
+          console.error(
+            `[YouTube Plugin] Failed to send notification for channel ${sub.youtubeChannelId}:`,
+            sendError
+          );
+          // Prevent re-notification
           sub.lastVideoId = latest.video_id;
           await sub.save();
         }
       } else {
-        console.log(`[YouTube Plugin] Discord channel not found or not text-based: ${sub.discordChannelId}`);
+        console.log(
+          `[YouTube Plugin] Discord channel not found or not text-based: ${sub.discordChannelId}`
+        );
       }
     } catch (err) {
-      console.error(`[YouTube Plugin] Check failed for channel ${sub.youtubeChannelId}:`, err);
+      console.error(
+        `[YouTube Plugin] Check failed for channel ${sub.youtubeChannelId}:`,
+        err
+      );
     }
   }
   console.log('[YouTube Plugin] YouTube subscription check completed');
@@ -101,5 +164,5 @@ export const youtubePlugin: Plugin = {
   },
   async unload() {
     if (interval) clearInterval(interval);
-  }
+  },
 };
