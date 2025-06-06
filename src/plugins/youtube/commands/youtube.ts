@@ -293,7 +293,7 @@ export const youtube: Command = {
           await existing.destroy();
           const channelInfo = await XMLTubeInfoFetcher(channelId);
           const channelName = channelInfo?.author.name;
-          const titleComponent = new TextDisplayBuilder().setContent('###✅ Unsubscribed');
+          const titleComponent = new TextDisplayBuilder().setContent('### ✅ Unsubscribed');
           const descComponent = new TextDisplayBuilder().setContent(
             `**Channel:** ${channelName || 'Unknown'}\n**Channel ID:** ${channelId}`,
           );
