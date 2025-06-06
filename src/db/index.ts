@@ -56,7 +56,9 @@ export async function syncBackupDatabase() {
     const backupModel = backupDB.models[modelName];
     if (!backupModel) continue;
     const records = await mainModel.findAll({ raw: true });
-    await backupModel.bulkCreate(records, { updateOnDuplicate: Object.keys(mainModel.rawAttributes) });
+    await backupModel.bulkCreate(records as any[], {
+      updateOnDuplicate: Object.keys(mainModel.rawAttributes)
+    });
   }
 
   console.log('🔄 Backup database synchronized');
