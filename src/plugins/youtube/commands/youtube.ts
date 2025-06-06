@@ -1,4 +1,13 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, SlashCommandSubcommandsOnlyBuilder, MessageFlags } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags,
+  SlashCommandBuilder,
+  SlashCommandSubcommandsOnlyBuilder
+} from 'discord.js';
 import { Command } from '../../types';
 import { YouTubeSubscription } from '../../../db/models';
 import { resolveYouTubeHandle } from '../../../utils/youtubeHandleResolver';
@@ -123,6 +132,7 @@ export const youtube: Command = {
 
         let channelId: string;
         let channelName: string | undefined;
+        let channelUrl: string | undefined;
 
         // Check if input is already a channel ID
         if (isChannelId(channelInput)) {
@@ -132,6 +142,7 @@ export const youtube: Command = {
           const channelInfo = await XMLTubeInfoFetcher(channelId);
           if (channelInfo) {
             channelName = channelInfo.author.name;
+            channelUrl = channelInfo.author.url;
           }
         } else {
           // Input is a handle, resolve it to channel ID
@@ -148,6 +159,7 @@ export const youtube: Command = {
           const channelInfo = await XMLTubeInfoFetcher(channelId);
           if (channelInfo) {
             channelName = channelInfo.author.name;
+            channelUrl = channelInfo.author.url;
           } else {
             await interaction.editReply({ content: `Found channel ID ${channelId} but couldn't verify it. The channel might not have any videos or RSS feed disabled.` });
             return;
@@ -178,12 +190,21 @@ export const youtube: Command = {
             { name: 'Channel ID', value: channelId, inline: true },
             { name: 'Discord Channel', value: `<#${discordChannel.id}>`, inline: true }
           );
-          
+
         if (mentionRole) {
           embed.addFields({ name: 'Mention Role', value: `<@&${mentionRole.id}>`, inline: true });
         }
-          
-        await interaction.editReply({ embeds: [embed] });
+
+        const row = channelUrl
+          ? new ActionRowBuilder<ButtonBuilder>().addComponents(
+              new ButtonBuilder()
+                .setLabel('View Channel')
+                .setStyle(ButtonStyle.Link)
+                .setURL(channelUrl)
+            )
+          : undefined;
+
+        await interaction.editReply({ embeds: [embed], components: row ? [row] : [] });
       } else if (sub === 'unsubscribe') {
         const channelInput = interaction.options.getString('channel', true);
         
@@ -206,30 +227,80 @@ export const youtube: Command = {
           channelId = result.channelId;
         }
 
+        const channelInfo = await XMLTubeInfoFetcher(channelId);
+        const channelName = channelInfo?.author.name;
+        const channelUrl = channelInfo?.author.url;
+
         const count = await YouTubeSubscription.destroy({ where: { guildId: interaction.guildId, youtubeChannelId: channelId } });
+        const embed = new EmbedBuilder();
+
         if (count > 0) {
-          await interaction.editReply({ content: `Unsubscribed from ${channelId}.` });
+          embed
+            .setColor(0x00FF00)
+            .setTitle('✅ Unsubscribed')
+            .addFields(
+              { name: 'Channel', value: channelName || 'Unknown', inline: true },
+              { name: 'Channel ID', value: channelId, inline: true }
+            );
         } else {
-          await interaction.editReply({ content: `No subscription found for ${channelId}.` });
+          embed
+            .setColor(0xFF0000)
+            .setTitle('❌ Subscription Not Found')
+            .setDescription(`No subscription found for ${channelId}.`);
         }
+
+        const row = channelUrl
+          ? new ActionRowBuilder<ButtonBuilder>().addComponents(
+              new ButtonBuilder()
+                .setLabel('View Channel')
+                .setStyle(ButtonStyle.Link)
+                .setURL(channelUrl)
+            )
+          : undefined;
+
+        await interaction.editReply({ embeds: [embed], components: row ? [row] : [] });
       } else if (sub === 'set-role') {
         const channelId = interaction.options.getString('channel_id', true);
         const role = interaction.options.getRole('mention_role');
         const subRecord = await YouTubeSubscription.findOne({ where: { guildId: interaction.guildId, youtubeChannelId: channelId } });
+        const embed = new EmbedBuilder();
+
         if (!subRecord) {
-          await interaction.reply({ content: `No subscription found for ${channelId}.`, flags: MessageFlags.Ephemeral });
+          embed
+            .setColor(0xFF0000)
+            .setTitle('❌ Subscription Not Found')
+            .setDescription(`No subscription found for ${channelId}.`);
         } else {
           subRecord.mentionRoleId = role?.id ?? null;
           await subRecord.save();
-          await interaction.reply({ content: `Updated mention role for ${channelId}.`, flags: MessageFlags.Ephemeral });
+          embed
+            .setColor(0x00FF00)
+            .setTitle('✅ Updated Mention Role')
+            .addFields(
+              { name: 'Channel ID', value: channelId, inline: true },
+              { name: 'Mention Role', value: role ? `<@&${role.id}>` : 'None', inline: true }
+            );
         }
+
+        await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
       } else if (sub === 'list') {
         const subs = await YouTubeSubscription.findAll({ where: { guildId: interaction.guildId } });
         if (subs.length === 0) {
           await interaction.reply({ content: 'No subscriptions found.', flags: MessageFlags.Ephemeral });
         } else {
-          const lines = subs.map(s => `${s.youtubeChannelId} -> <#${s.discordChannelId}>${s.mentionRoleId ? ` (role <@&${s.mentionRoleId}>)` : ''}`);
-          await interaction.reply({ content: `Subscriptions:\n${lines.join('\n')}`, flags: MessageFlags.Ephemeral });
+          const embed = new EmbedBuilder()
+            .setTitle('📺 Current Subscriptions')
+            .setColor(0x0099FF);
+
+          for (const s of subs) {
+            embed.addFields({
+              name: s.youtubeChannelId,
+              value: `<#${s.discordChannelId}>${s.mentionRoleId ? ` (role <@&${s.mentionRoleId}>)` : ''}`,
+              inline: false
+            });
+          }
+
+          await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
       }
     } catch (err) {
