@@ -1,11 +1,8 @@
 import { Client } from "discord.js";
 import { Plugin } from "./types";
 import { DefaultPluginManager } from "./pluginManager";
-import { corePlugin } from "./core/corePlugin";
-import { informationPlugin } from "./information/informationPlugin";
-import { ownerPlugin } from "./owner/ownerPlugin";
 import { handleError } from "../utils/errorHandler";
-// import { examplePlugin } from "./example/examplePlugin";
+import { defaultPlugins } from "./pluginList";
 
 export class PluginLoader {
   private pluginManager: DefaultPluginManager;
@@ -20,12 +17,7 @@ export class PluginLoader {
   }
 
   async loadAllPlugins(): Promise<void> {
-    const plugins = [
-      corePlugin,
-      informationPlugin,
-      ownerPlugin,
-      // examplePlugin, // Uncomment to enable the example plugin
-    ];
+    const plugins = defaultPlugins;
 
     console.log("🔌 Loading plugins, please wait...");
     
