@@ -48,7 +48,10 @@ export async function XMLTubeInfoFetcher(provided_channel_id: string): Promise<C
   }
 
   try {
-    const response = await axios.get(`http://www.youtube.com/feeds/videos.xml?channel_id=${provided_channel_id}`);
+    const response = await axios.get(
+      `https://www.youtube.com/feeds/videos.xml?channel_id=${provided_channel_id}`,
+      { timeout: 10000 }
+    );
 
     if (response.status === 200) {
       const xml = response.data;
@@ -97,17 +100,18 @@ export async function XMLTubeInfoFetcher(provided_channel_id: string): Promise<C
       return reply;
     }
   } catch (error: any) {
+    if (error.code === 'ECONNABORTED') {
+      console.error(`YouTube request timed out for channel ${provided_channel_id}`);
+      return null;
+    }
     if (error.response && error.response.status === 404) {
       console.error(
         new Error(`YouTube feed not found (status 404) for "${provided_channel_id}" channel id.\n`).stack
       );
       return null;
-    } else {
-      console.error(
-        new Error(`Error while fetching Youtube Feed:\n${error.stack}`)
-      );
-      return null;
     }
+    console.error(new Error(`Error while fetching Youtube Feed:\n${error.stack}`));
+    return null;
   }
   return null;
 }

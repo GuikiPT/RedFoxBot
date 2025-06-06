@@ -18,6 +18,9 @@ export const youtube: Command = {
         .addChannelOption(o =>
           o.setName('discord_channel').setDescription('Discord channel').setRequired(true)
         )
+        .addRoleOption(o =>
+          o.setName('mention_role').setDescription('Role to mention for new uploads').setRequired(false)
+        )
     )
     .addSubcommand(sub =>
       sub
@@ -47,6 +50,20 @@ export const youtube: Command = {
         )
         .addChannelOption(o =>
           o.setName('discord_channel').setDescription('Discord channel').setRequired(true)
+        )
+        .addRoleOption(o =>
+          o.setName('mention_role').setDescription('Role to mention for new uploads').setRequired(false)
+        )
+    )
+    .addSubcommand(sub =>
+      sub
+        .setName('set-role')
+        .setDescription('Set mention role for an existing subscription')
+        .addStringOption(o =>
+          o.setName('channel_id').setDescription('YouTube channel ID').setRequired(true)
+        )
+        .addRoleOption(o =>
+          o.setName('mention_role').setDescription('Role to mention (leave empty to clear)').setRequired(false)
         )
     ) as SlashCommandBuilder,
   async execute(interaction: ChatInputCommandInteraction) {
@@ -103,20 +120,31 @@ export const youtube: Command = {
       if (sub === 'subscribe') {
         const channelId = interaction.options.getString('channel_id', true);
         const discordChannel = interaction.options.getChannel('discord_channel', true);
+        const mentionRole = interaction.options.getRole('mention_role');
         if (!('isTextBased' in discordChannel) || !discordChannel.isTextBased()) {
           await interaction.reply({ content: 'Please select a text channel.', ephemeral: true });
           return;
         }
-        await YouTubeSubscription.create({
-          guildId: interaction.guildId,
-          youtubeChannelId: channelId,
-          discordChannelId: discordChannel.id,
-          lastVideoId: null,
-        });
-        await interaction.reply({ content: `Subscribed to ${channelId} in ${discordChannel}.`, ephemeral: true });
+        const existing = await YouTubeSubscription.findOne({ where: { guildId: interaction.guildId, youtubeChannelId: channelId } });
+        if (existing) {
+          existing.discordChannelId = discordChannel.id;
+          existing.mentionRoleId = mentionRole?.id ?? null;
+          await existing.save();
+          await interaction.reply({ content: `Updated subscription for ${channelId}.`, ephemeral: true });
+        } else {
+          await YouTubeSubscription.create({
+            guildId: interaction.guildId,
+            youtubeChannelId: channelId,
+            discordChannelId: discordChannel.id,
+            lastVideoId: null,
+            mentionRoleId: mentionRole?.id ?? null,
+          });
+          await interaction.reply({ content: `Subscribed to ${channelId} in ${discordChannel}.`, ephemeral: true });
+        }
       } else if (sub === 'subscribe-handle') {
         const handle = interaction.options.getString('handle', true);
         const discordChannel = interaction.options.getChannel('discord_channel', true);
+        const mentionRole = interaction.options.getRole('mention_role');
         
         if (!('isTextBased' in discordChannel) || !discordChannel.isTextBased()) {
           await interaction.reply({ content: 'Please select a text channel.', ephemeral: true });
@@ -132,12 +160,20 @@ export const youtube: Command = {
           const channelInfo = await XMLTubeInfoFetcher(result.channelId);
           
           if (channelInfo) {
-            await YouTubeSubscription.create({
-              guildId: interaction.guildId,
-              youtubeChannelId: result.channelId,
-              discordChannelId: discordChannel.id,
-              lastVideoId: null,
-            });
+            const existing = await YouTubeSubscription.findOne({ where: { guildId: interaction.guildId, youtubeChannelId: result.channelId } });
+            if (existing) {
+              existing.discordChannelId = discordChannel.id;
+              existing.mentionRoleId = mentionRole?.id ?? null;
+              await existing.save();
+            } else {
+              await YouTubeSubscription.create({
+                guildId: interaction.guildId,
+                youtubeChannelId: result.channelId,
+                discordChannelId: discordChannel.id,
+                lastVideoId: null,
+                mentionRoleId: mentionRole?.id ?? null,
+              });
+            }
             
             const embed = new EmbedBuilder()
               .setTitle('✅ Successfully Subscribed')
@@ -163,12 +199,23 @@ export const youtube: Command = {
         } else {
           await interaction.reply({ content: `No subscription found for ${channelId}.`, ephemeral: true });
         }
+      } else if (sub === 'set-role') {
+        const channelId = interaction.options.getString('channel_id', true);
+        const role = interaction.options.getRole('mention_role');
+        const subRecord = await YouTubeSubscription.findOne({ where: { guildId: interaction.guildId, youtubeChannelId: channelId } });
+        if (!subRecord) {
+          await interaction.reply({ content: `No subscription found for ${channelId}.`, ephemeral: true });
+        } else {
+          subRecord.mentionRoleId = role?.id ?? null;
+          await subRecord.save();
+          await interaction.reply({ content: `Updated mention role for ${channelId}.`, ephemeral: true });
+        }
       } else if (sub === 'list') {
         const subs = await YouTubeSubscription.findAll({ where: { guildId: interaction.guildId } });
         if (subs.length === 0) {
           await interaction.reply({ content: 'No subscriptions found.', ephemeral: true });
         } else {
-          const lines = subs.map(s => `${s.youtubeChannelId} -> <#${s.discordChannelId}>`);
+          const lines = subs.map(s => `${s.youtubeChannelId} -> <#${s.discordChannelId}>${s.mentionRoleId ? ` (role <@&${s.mentionRoleId}>)` : ''}`);
           await interaction.reply({ content: `Subscriptions:\n${lines.join('\n')}`, ephemeral: true });
         }
       }
