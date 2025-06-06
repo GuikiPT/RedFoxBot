@@ -1,19 +1,13 @@
-import { Client } from "discord.js";
 import { config } from "./config/config";
-import { PluginLoader } from "./plugins";
+import { RedFoxClient } from "./redfoxClient";
 import "./logger";
 import { handleError } from "./utils/errorHandler";
 import { initDatabases } from "./db";
 import { registerShutdownHandlers } from "./utils/shutdown";
 
-const client = new Client({
+const client = new RedFoxClient({
   intents: ["Guilds", "GuildMessages", "DirectMessages"],
 });
-
-// Initialize plugin loader
-const pluginLoader = new PluginLoader(client);
-// Attach plugin loader to client for access in commands
-(client as any).pluginLoader = pluginLoader;
 
 // Initialize bot
 async function initializeBot() {
@@ -24,7 +18,7 @@ async function initializeBot() {
     await initDatabases();
     
     // Load all plugins
-    await pluginLoader.loadAllPlugins();
+    await client.pluginLoader.loadAllPlugins();
     
     // Login to Discord
     await client.login(config.DISCORD_TOKEN);
@@ -36,7 +30,7 @@ async function initializeBot() {
 }
 
 // Graceful shutdown
-registerShutdownHandlers(client, pluginLoader);
+registerShutdownHandlers(client, client.pluginLoader);
 
 process.on("unhandledRejection", (reason) => {
   handleError(reason, "Unhandled promise rejection");
