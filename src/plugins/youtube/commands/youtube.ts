@@ -1,8 +1,14 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, SlashCommandSubcommandsOnlyBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, SlashCommandSubcommandsOnlyBuilder, MessageFlags } from 'discord.js';
 import { Command } from '../../types';
 import { YouTubeSubscription } from '../../../db/models';
 import { resolveYouTubeHandle } from '../../../utils/youtubeHandleResolver';
 import { XMLTubeInfoFetcher } from '../../../utils/xmlTubeInfoFetcher';
+
+// Helper function to detect if input is a channel ID or handle
+function isChannelId(input: string): boolean {
+  // YouTube channel IDs are 24 characters starting with UC
+  return /^UC[a-zA-Z0-9_-]{22}$/.test(input);
+}
 
 export const youtube: Command = {
   data: new SlashCommandBuilder()
@@ -13,7 +19,7 @@ export const youtube: Command = {
         .setName('subscribe')
         .setDescription('Subscribe to a YouTube channel')
         .addStringOption(o =>
-          o.setName('channel_id').setDescription('YouTube channel ID').setRequired(true)
+          o.setName('channel').setDescription('YouTube channel ID, handle (@username), or URL').setRequired(true)
         )
         .addChannelOption(o =>
           o.setName('discord_channel').setDescription('Discord channel').setRequired(true)
@@ -27,7 +33,7 @@ export const youtube: Command = {
         .setName('unsubscribe')
         .setDescription('Unsubscribe from a YouTube channel')
         .addStringOption(o =>
-          o.setName('channel_id').setDescription('YouTube channel ID').setRequired(true)
+          o.setName('channel').setDescription('YouTube channel ID, handle (@username), or URL').setRequired(true)
         )
     )
     .addSubcommand(sub =>
@@ -39,20 +45,6 @@ export const youtube: Command = {
         .setDescription('Look up YouTube channel ID from handle or URL')
         .addStringOption(o =>
           o.setName('handle').setDescription('YouTube handle (@username), custom URL, or channel URL').setRequired(true)
-        )
-    )
-    .addSubcommand(sub =>
-      sub
-        .setName('subscribe-handle')
-        .setDescription('Subscribe to a YouTube channel using handle')
-        .addStringOption(o =>
-          o.setName('handle').setDescription('YouTube handle (@username) or custom URL').setRequired(true)
-        )
-        .addChannelOption(o =>
-          o.setName('discord_channel').setDescription('Discord channel').setRequired(true)
-        )
-        .addRoleOption(o =>
-          o.setName('mention_role').setDescription('Role to mention for new uploads').setRequired(false)
         )
     )
     .addSubcommand(sub =>
@@ -72,7 +64,7 @@ export const youtube: Command = {
       if (sub === 'lookup') {
         const handle = interaction.options.getString('handle', true);
         
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         
         const result = await resolveYouTubeHandle(handle);
         
@@ -113,24 +105,61 @@ export const youtube: Command = {
       }
 
       if (!interaction.guildId) {
-        await interaction.reply({ content: 'This command can only be used in a guild.', ephemeral: true });
+        await interaction.reply({ content: 'This command can only be used in a guild.', flags: MessageFlags.Ephemeral });
         return;
       }
 
       if (sub === 'subscribe') {
-        const channelId = interaction.options.getString('channel_id', true);
+        const channelInput = interaction.options.getString('channel', true);
         const discordChannel = interaction.options.getChannel('discord_channel', true);
         const mentionRole = interaction.options.getRole('mention_role');
+        
         if (!('isTextBased' in discordChannel) || !discordChannel.isTextBased()) {
-          await interaction.reply({ content: 'Please select a text channel.', ephemeral: true });
+          await interaction.reply({ content: 'Please select a text channel.', flags: MessageFlags.Ephemeral });
           return;
         }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+        let channelId: string;
+        let channelName: string | undefined;
+
+        // Check if input is already a channel ID
+        if (isChannelId(channelInput)) {
+          channelId = channelInput;
+          
+          // Try to get channel info to verify it works and get the name
+          const channelInfo = await XMLTubeInfoFetcher(channelId);
+          if (channelInfo) {
+            channelName = channelInfo.author.name;
+          }
+        } else {
+          // Input is a handle, resolve it to channel ID
+          const result = await resolveYouTubeHandle(channelInput);
+          
+          if (!result.channelId) {
+            await interaction.editReply({ content: `Could not resolve "${channelInput}": ${result.error}` });
+            return;
+          }
+          
+          channelId = result.channelId;
+          
+          // Verify the channel works and get info
+          const channelInfo = await XMLTubeInfoFetcher(channelId);
+          if (channelInfo) {
+            channelName = channelInfo.author.name;
+          } else {
+            await interaction.editReply({ content: `Found channel ID ${channelId} but couldn't verify it. The channel might not have any videos or RSS feed disabled.` });
+            return;
+          }
+        }
+
+        // Create or update subscription
         const existing = await YouTubeSubscription.findOne({ where: { guildId: interaction.guildId, youtubeChannelId: channelId } });
         if (existing) {
           existing.discordChannelId = discordChannel.id;
           existing.mentionRoleId = mentionRole?.id ?? null;
           await existing.save();
-          await interaction.reply({ content: `Updated subscription for ${channelId}.`, ephemeral: true });
         } else {
           await YouTubeSubscription.create({
             guildId: interaction.guildId,
@@ -139,90 +168,74 @@ export const youtube: Command = {
             lastVideoId: null,
             mentionRoleId: mentionRole?.id ?? null,
           });
-          await interaction.reply({ content: `Subscribed to ${channelId} in ${discordChannel}.`, ephemeral: true });
         }
-      } else if (sub === 'subscribe-handle') {
-        const handle = interaction.options.getString('handle', true);
-        const discordChannel = interaction.options.getChannel('discord_channel', true);
-        const mentionRole = interaction.options.getRole('mention_role');
         
-        if (!('isTextBased' in discordChannel) || !discordChannel.isTextBased()) {
-          await interaction.reply({ content: 'Please select a text channel.', ephemeral: true });
-          return;
+        const embed = new EmbedBuilder()
+          .setTitle('✅ Successfully Subscribed')
+          .setColor(0x00FF00)
+          .addFields(
+            { name: 'Channel', value: channelName || 'Unknown', inline: true },
+            { name: 'Channel ID', value: channelId, inline: true },
+            { name: 'Discord Channel', value: `<#${discordChannel.id}>`, inline: true }
+          );
+          
+        if (mentionRole) {
+          embed.addFields({ name: 'Mention Role', value: `<@&${mentionRole.id}>`, inline: true });
+        }
+          
+        await interaction.editReply({ embeds: [embed] });
+      } else if (sub === 'unsubscribe') {
+        const channelInput = interaction.options.getString('channel', true);
+        
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+        let channelId: string;
+
+        // Check if input is already a channel ID
+        if (isChannelId(channelInput)) {
+          channelId = channelInput;
+        } else {
+          // Input is a handle, resolve it to channel ID
+          const result = await resolveYouTubeHandle(channelInput);
+          
+          if (!result.channelId) {
+            await interaction.editReply({ content: `Could not resolve "${channelInput}": ${result.error}` });
+            return;
+          }
+          
+          channelId = result.channelId;
         }
 
-        await interaction.deferReply({ ephemeral: true });
-        
-        const result = await resolveYouTubeHandle(handle);
-        
-        if (result.channelId) {
-          // Verify the channel works
-          const channelInfo = await XMLTubeInfoFetcher(result.channelId);
-          
-          if (channelInfo) {
-            const existing = await YouTubeSubscription.findOne({ where: { guildId: interaction.guildId, youtubeChannelId: result.channelId } });
-            if (existing) {
-              existing.discordChannelId = discordChannel.id;
-              existing.mentionRoleId = mentionRole?.id ?? null;
-              await existing.save();
-            } else {
-              await YouTubeSubscription.create({
-                guildId: interaction.guildId,
-                youtubeChannelId: result.channelId,
-                discordChannelId: discordChannel.id,
-                lastVideoId: null,
-                mentionRoleId: mentionRole?.id ?? null,
-              });
-            }
-            
-            const embed = new EmbedBuilder()
-              .setTitle('✅ Successfully Subscribed')
-              .setColor(0x00FF00)
-              .addFields(
-                { name: 'Channel', value: channelInfo.author.name, inline: true },
-                { name: 'Channel ID', value: result.channelId, inline: true },
-                { name: 'Discord Channel', value: `<#${discordChannel.id}>`, inline: true }
-              );
-              
-            await interaction.editReply({ embeds: [embed] });
-          } else {
-            await interaction.editReply({ content: `Found channel ID ${result.channelId} but couldn't verify it. The channel might not have any videos or RSS feed disabled.` });
-          }
-        } else {
-          await interaction.editReply({ content: `Could not resolve handle "${handle}": ${result.error}` });
-        }
-      } else if (sub === 'unsubscribe') {
-        const channelId = interaction.options.getString('channel_id', true);
         const count = await YouTubeSubscription.destroy({ where: { guildId: interaction.guildId, youtubeChannelId: channelId } });
         if (count > 0) {
-          await interaction.reply({ content: `Unsubscribed from ${channelId}.`, ephemeral: true });
+          await interaction.editReply({ content: `Unsubscribed from ${channelId}.` });
         } else {
-          await interaction.reply({ content: `No subscription found for ${channelId}.`, ephemeral: true });
+          await interaction.editReply({ content: `No subscription found for ${channelId}.` });
         }
       } else if (sub === 'set-role') {
         const channelId = interaction.options.getString('channel_id', true);
         const role = interaction.options.getRole('mention_role');
         const subRecord = await YouTubeSubscription.findOne({ where: { guildId: interaction.guildId, youtubeChannelId: channelId } });
         if (!subRecord) {
-          await interaction.reply({ content: `No subscription found for ${channelId}.`, ephemeral: true });
+          await interaction.reply({ content: `No subscription found for ${channelId}.`, flags: MessageFlags.Ephemeral });
         } else {
           subRecord.mentionRoleId = role?.id ?? null;
           await subRecord.save();
-          await interaction.reply({ content: `Updated mention role for ${channelId}.`, ephemeral: true });
+          await interaction.reply({ content: `Updated mention role for ${channelId}.`, flags: MessageFlags.Ephemeral });
         }
       } else if (sub === 'list') {
         const subs = await YouTubeSubscription.findAll({ where: { guildId: interaction.guildId } });
         if (subs.length === 0) {
-          await interaction.reply({ content: 'No subscriptions found.', ephemeral: true });
+          await interaction.reply({ content: 'No subscriptions found.', flags: MessageFlags.Ephemeral });
         } else {
           const lines = subs.map(s => `${s.youtubeChannelId} -> <#${s.discordChannelId}>${s.mentionRoleId ? ` (role <@&${s.mentionRoleId}>)` : ''}`);
-          await interaction.reply({ content: `Subscriptions:\n${lines.join('\n')}`, ephemeral: true });
+          await interaction.reply({ content: `Subscriptions:\n${lines.join('\n')}`, flags: MessageFlags.Ephemeral });
         }
       }
     } catch (err) {
       console.error('YouTube command failed:', err);
       if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({ content: 'Command failed.', ephemeral: true });
+        await interaction.reply({ content: 'Command failed.', flags: MessageFlags.Ephemeral });
       } else if (interaction.deferred) {
         await interaction.editReply({ content: 'Command failed.' });
       }
