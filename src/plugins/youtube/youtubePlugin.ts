@@ -1,8 +1,8 @@
-import { Client, EmbedBuilder, TextBasedChannel } from 'discord.js';
+import { Client, EmbedBuilder, TextBasedChannel, GuildTextBasedChannel } from 'discord.js';
 import { Plugin } from '../types';
 import { youtube } from './commands/youtube';
 import { YouTubeSubscription } from '../../db/models';
-import { XMLTubeInfoFetcher } from 'xmltubeinfofetcher';
+import { XMLTubeInfoFetcher } from '../../utils/xmlTubeInfoFetcher';
 
 let interval: NodeJS.Timeout | undefined;
 
@@ -30,7 +30,7 @@ export const youtubePlugin: Plugin = {
               .setImage(latest.thumbnails.max_res_default)
               .setDescription(latest.description ?? '')
               .setTimestamp(new Date(latest.published_at * 1000));
-            await (channel as TextBasedChannel).send({ content: `New video from ${info.author.name}!`, embeds: [embed] });
+            await (channel as GuildTextBasedChannel).send({ content: `New video from ${info.author.name}!`, embeds: [embed] });
             sub.lastVideoId = latest.video_id;
             await sub.save();
           }

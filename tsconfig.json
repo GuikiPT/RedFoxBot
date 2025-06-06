@@ -11,5 +11,7 @@
     "strict": true,
     "strictNullChecks": true,
     "skipLibCheck": true
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["test-*.ts", "node_modules", "dist"]
 }
