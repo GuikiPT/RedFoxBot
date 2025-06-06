@@ -4,6 +4,7 @@ import { PluginLoader } from "./plugins";
 import "./logger";
 import { handleError } from "./utils/errorHandler";
 import { initDatabases } from "./db";
+import { registerShutdownHandlers } from "./utils/shutdown";
 
 const client = new Client({
   intents: ["Guilds", "GuildMessages", "DirectMessages"],
@@ -35,19 +36,7 @@ async function initializeBot() {
 }
 
 // Graceful shutdown
-process.on("SIGINT", async () => {
-  console.log("\n🛑 Shutting down RedFoxBot...");
-  await pluginLoader.unloadAllPlugins();
-  await client.destroy();
-  process.exit(0);
-});
-
-process.on("SIGTERM", async () => {
-  console.log("\n🛑 Shutting down RedFoxBot...");
-  await pluginLoader.unloadAllPlugins();
-  await client.destroy();
-  process.exit(0);
-});
+registerShutdownHandlers(client, pluginLoader);
 
 process.on("unhandledRejection", (reason) => {
   handleError(reason, "Unhandled promise rejection");

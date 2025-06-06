@@ -1,25 +1,16 @@
-import { REST, Routes } from "discord.js";
 import { config } from "./config/config";
 import { DefaultPluginManager } from "./plugins/pluginManager";
+import { defaultPlugins } from "./plugins/pluginList";
 import { handleError } from "./utils/errorHandler";
-import { commandsChanged } from "./utils/commandCache";
+import { deployGuildCommands as deployGuild, deployGlobalCommands as deployGlobal } from "./utils/commandDeployer";
 
 // Function to create a plugin manager with all plugins loaded
 function createPluginManagerWithPlugins() {
-  const tempPluginManager = new DefaultPluginManager();
-  
-  // Import plugins directly to avoid circular dependency
-  const { corePlugin } = require("./plugins/core/corePlugin");
-  const { informationPlugin } = require("./plugins/information/informationPlugin");
-  const { ownerPlugin } = require("./plugins/owner/ownerPlugin");
-  
-  tempPluginManager.plugins.set("core", corePlugin);
-  tempPluginManager.plugins.set("information", informationPlugin);
-  tempPluginManager.plugins.set("owner", ownerPlugin);
-  // Add other plugins here as needed
-  // tempPluginManager.plugins.set("example", examplePlugin);
-  
-  return tempPluginManager;
+  const manager = new DefaultPluginManager();
+  for (const plugin of defaultPlugins) {
+    manager.plugins.set(plugin.name, plugin);
+  }
+  return manager;
 }
 
 type DeployCommandsProps = {
@@ -30,20 +21,8 @@ export async function deployCommands({ guildId }: DeployCommandsProps) {
   try {
     console.log(`🚀 Deploying commands to guild ${guildId}...`);
 
-    const tempPluginManager = createPluginManagerWithPlugins();
-    const commands = tempPluginManager
-      .getCommandsForGuild(guildId)
-      .map((cmd) => cmd.data);
-    const rest = new REST({ version: "10" }).setToken(config.DISCORD_TOKEN);
-
-    if (commandsChanged(guildId, commands.map((c) => c.toJSON()))) {
-      await rest.put(Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId), {
-        body: commands,
-      });
-      console.log(`✅ Commands deployed to guild ${guildId}!`);
-    } else {
-      console.log(`ℹ️ Commands for guild ${guildId} are up to date`);
-    }
+    const manager = createPluginManagerWithPlugins();
+    await deployGuild(manager, guildId);
   } catch (error) {
     handleError(error, 'deployCommands');
   }
@@ -52,19 +31,8 @@ export async function deployCommands({ guildId }: DeployCommandsProps) {
 export async function deployGlobalCommands() {
   try {
     console.log("🚀 Deploying global commands...");
-
-    const tempPluginManager = createPluginManagerWithPlugins();
-    const commands = tempPluginManager.getGlobalCommands().map((cmd) => cmd.data);
-    const rest = new REST({ version: "10" }).setToken(config.DISCORD_TOKEN);
-
-    if (commandsChanged("global", commands.map((c) => c.toJSON()))) {
-      await rest.put(Routes.applicationCommands(config.DISCORD_CLIENT_ID), {
-        body: commands,
-      });
-      console.log("✅ Global commands deployed!");
-    } else {
-      console.log("ℹ️  Global commands are up to date");
-    }
+    const manager = createPluginManagerWithPlugins();
+    await deployGlobal(manager);
   } catch (error) {
     handleError(error, 'deployGlobalCommands');
   }
@@ -72,18 +40,7 @@ export async function deployGlobalCommands() {
 
 export async function deployAllCommands() {
   const manager = createPluginManagerWithPlugins();
-  const rest = new REST({ version: "10" }).setToken(config.DISCORD_TOKEN);
-
-  // Global commands
-  const globalCmds = manager.getGlobalCommands().map((c) => c.data);
-  if (commandsChanged("global", globalCmds.map((c) => c.toJSON()))) {
-    await rest.put(Routes.applicationCommands(config.DISCORD_CLIENT_ID), {
-      body: globalCmds,
-    });
-    console.log("✅ Global commands deployed!");
-  } else {
-    console.log("ℹ️  Global commands are up to date");
-  }
+  await deployGlobal(manager);
 
   // Guild specific commands
   const guildIds = new Set<string>();
@@ -94,16 +51,6 @@ export async function deployAllCommands() {
   }
 
   for (const guildId of guildIds) {
-    const cmds = manager.getCommandsForGuild(guildId).map((c) => c.data);
-    if (cmds.length === 0) continue;
-    if (commandsChanged(guildId, cmds.map((c) => c.toJSON()))) {
-      await rest.put(
-        Routes.applicationGuildCommands(config.DISCORD_CLIENT_ID, guildId),
-        { body: cmds }
-      );
-      console.log(`✅ Commands deployed to guild ${guildId}!`);
-    } else {
-      console.log(`ℹ️ Commands for guild ${guildId} are up to date`);
-    }
+    await deployGuild(manager, guildId);
   }
 }
