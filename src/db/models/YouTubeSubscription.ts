@@ -6,6 +6,7 @@ export class YouTubeSubscription extends Model {
   public discordChannelId!: string;
   public youtubeChannelId!: string;
   public lastVideoId!: string | null;
+  public mentionRoleId!: string | null;
 }
 
 export function initYouTubeSubscription(sequelize: Sequelize) {
@@ -32,6 +33,10 @@ export function initYouTubeSubscription(sequelize: Sequelize) {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      mentionRoleId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      }
     },
     { sequelize }
   );

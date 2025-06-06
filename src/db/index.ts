@@ -23,7 +23,7 @@ export async function initDatabases() {
   try {
     await mainDB.authenticate();
     initModels(mainDB);
-    await mainDB.sync();
+    await mainDB.sync({ alter: true });
     console.log('✅ Connected to main SQLite database');
   } catch (err) {
     console.error(
@@ -36,7 +36,7 @@ export async function initDatabases() {
     try {
       await backupDB.authenticate();
       initModels(backupDB);
-      await backupDB.sync();
+      await backupDB.sync({ alter: true });
       console.log('✅ Connected to backup MariaDB database');
       await syncBackupDatabase();
     } catch (err) {

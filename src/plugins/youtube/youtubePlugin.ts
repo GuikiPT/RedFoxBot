@@ -30,7 +30,8 @@ export const youtubePlugin: Plugin = {
               .setImage(latest.thumbnails.max_res_default)
               .setDescription(latest.description ?? '')
               .setTimestamp(new Date(latest.published_at * 1000));
-            await (channel as GuildTextBasedChannel).send({ content: `New video from ${info.author.name}!`, embeds: [embed] });
+            const mention = sub.mentionRoleId ? `<@&${sub.mentionRoleId}> ` : '';
+            await (channel as GuildTextBasedChannel).send({ content: `${mention}New video from ${info.author.name}!`, embeds: [embed] });
             sub.lastVideoId = latest.video_id;
             await sub.save();
           }
