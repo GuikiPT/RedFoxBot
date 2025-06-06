@@ -10,6 +10,7 @@ import {
   SeparatorBuilder,
   SeparatorSpacingSize,
   TextDisplayBuilder,
+  MessageFlags,
 } from 'discord.js';
 import { Plugin } from '../types';
 import { youtube } from './commands/youtube';
@@ -117,6 +118,7 @@ async function checkSubscriptions(client: Client) {
           await (channel as GuildTextBasedChannel).send({
             content: mention,
             components: [containerComponent, buttonRow],
+            flags: MessageFlags.IsComponentsV2,
           });
 
           // 7) Update lastVideoId
@@ -158,11 +160,21 @@ export const youtubePlugin: Plugin = {
   global: true,
   async load(client: Client) {
     console.log('[YouTube Plugin] Setting up YouTube subscription checker (1 minute intervals)');
-
-    await checkSubscriptions(client);
-    interval = setInterval(() => checkSubscriptions(client), 1 * 60 * 1000);
+    await checkSubscriptions(client).catch(err =>
+      console.error('[YouTube Plugin] Initial check failed:', err)
+    );
+    interval = setInterval(
+      () =>
+        checkSubscriptions(client).catch(err =>
+          console.error('[YouTube Plugin] Periodic check failed:', err)
+        ),
+      1 * 60 * 1000
+    );
   },
   async unload() {
-    if (interval) clearInterval(interval);
+    if (interval) {
+      clearInterval(interval);
+      interval = undefined;
+    }
   },
 };
