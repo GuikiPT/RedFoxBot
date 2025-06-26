@@ -27,8 +27,8 @@ function createBasicVideoInfo(videoId: string): SingleVideoInfo {
             star_rating: null,
             statistics: null
         },
-        published_at: Math.floor(Date.now() / 1000),
-        lastUpdate_at: Math.floor(Date.now() / 1000),
+        published_at: Math.floor(Date.now() / 1000), // Fallback for unknown videos
+        lastUpdate_at: Math.floor(Date.now() / 1000), // Fallback for unknown videos
     };
 
     const author: AuthorInfo = {
@@ -148,13 +148,33 @@ function extractVideoInfoFromHTML(html: string, videoId: string): SingleVideoInf
         
         // Extract publish date
         const publishedText = videoDetails.dateText?.simpleText || '';
-        let publishedAt = Math.floor(Date.now() / 1000); // Default to now
+        let publishedAt = Math.floor(Date.now() / 1000); // Fallback to current time only if no date found
         
-        // Try to parse the publish date (this is a simplified approach)
+        // Try to parse the publish date from multiple sources
         if (publishedText) {
-            const publishDate = new Date(publishedText);
+            // Try to parse date text like "Jun 24, 2025" or "Premiered Jun 24, 2025"
+            const cleanedText = publishedText.replace(/^(Premiered|Published|Streamed live on)\s+/i, '');
+            const publishDate = new Date(cleanedText);
             if (!isNaN(publishDate.getTime())) {
                 publishedAt = Math.floor(publishDate.getTime() / 1000);
+            }
+        } else {
+            // Try to extract from HTML meta tags or structured data
+            const metaDateMatches = [
+                html.match(/<meta itemprop="datePublished" content="([^"]+)"/),
+                html.match(/<meta property="video:release_date" content="([^"]+)"/),
+                html.match(/"datePublished":"([^"]+)"/),
+                html.match(/"uploadDate":"([^"]+)"/),
+            ];
+            
+            for (const match of metaDateMatches) {
+                if (match && match[1]) {
+                    const publishDate = new Date(match[1]);
+                    if (!isNaN(publishDate.getTime())) {
+                        publishedAt = Math.floor(publishDate.getTime() / 1000);
+                        break;
+                    }
+                }
             }
         }
 
