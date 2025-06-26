@@ -7,17 +7,7 @@ import { SubcommandHandler } from './types';
 import { YouTubeSubscription } from '../../../../db/models';
 import { XMLTubeInfoFetcher } from '../../../../utils/xmlTubeInfoFetcher';
 import { getYouTubeChannelAvatar } from '../../../../utils/youtubeChannelAvatar';
-
-// Helper function to format role mentions correctly
-function formatRoleMention(roleId: string, guildId: string): string {
-  if (roleId === guildId) {
-    // @everyone role
-    return '@everyone';
-  } else {
-    // Regular role
-    return `<@&${roleId}>`;
-  }
-}
+import { formatRoleMention } from '../../utils/helpers';
 
 export const listSubcommand: SubcommandHandler = {
   name: 'list',

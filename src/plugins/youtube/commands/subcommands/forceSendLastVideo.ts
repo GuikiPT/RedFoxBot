@@ -12,17 +12,7 @@ import { YouTubeSubscription } from '../../../../db/models';
 import { XMLTubeInfoFetcher } from '../../../../utils/xmlTubeInfoFetcher';
 import { getYouTubeChannelAvatar } from '../../../../utils/youtubeChannelAvatar';
 import { createVideoEmbed } from '../../utils/createVideoEmbed';
-
-// Helper function to format role mentions correctly
-function formatRoleMention(roleId: string, guildId: string): string {
-  if (roleId === guildId) {
-    // @everyone role
-    return '@everyone';
-  } else {
-    // Regular role
-    return `<@&${roleId}>`;
-  }
-}
+import { formatRoleMention, fetchTextChannel, createErrorEmbed } from '../../utils/helpers';
 
 export const forceSendLastVideoSubcommand: SubcommandHandler = {
   name: 'force-send-last-video',
@@ -35,12 +25,7 @@ export const forceSendLastVideoSubcommand: SubcommandHandler = {
     });
 
     if (!subscription) {
-      const embed = new EmbedBuilder()
-        .setColor(0xff0000)
-        .setTitle('❌ No Subscription Found')
-        .setDescription('No YouTube subscription found for this guild. Use `/youtube subscribe` first.')
-        .setTimestamp();
-
+      const embed = createErrorEmbed('❌ No Subscription Found', 'No YouTube subscription found for this guild. Use `/youtube subscribe` first.');
       await interaction.editReply({ embeds: [embed] });
       return;
     }
@@ -63,14 +48,9 @@ export const forceSendLastVideoSubcommand: SubcommandHandler = {
       const channelAvatar = await getYouTubeChannelAvatar(subscription.youtubeChannelId);
 
       // Get the Discord channel
-      const discordChannel = await interaction.client.channels.fetch(subscription.discordChannelId).catch(() => null);
-      if (!discordChannel || !discordChannel.isTextBased()) {
-        const embed = new EmbedBuilder()
-          .setColor(0xff0000)
-          .setTitle('❌ Channel Not Found')
-          .setDescription(`Discord channel <#${subscription.discordChannelId}> not found or not accessible.`)
-          .setTimestamp();
-
+      const discordChannel = await fetchTextChannel(interaction.client, subscription.discordChannelId);
+      if (!discordChannel) {
+        const embed = createErrorEmbed('❌ Channel Not Found', `Discord channel <#${subscription.discordChannelId}> not found or not accessible.`);
         await interaction.editReply({ embeds: [embed] });
         return;
       }

@@ -8,23 +8,7 @@ import { YouTubeSubscription } from '../../../../db/models';
 import { resolveYouTubeHandle } from '../../../../utils/youtubeHandleResolver';
 import { XMLTubeInfoFetcher } from '../../../../utils/xmlTubeInfoFetcher';
 import { getYouTubeChannelAvatar } from '../../../../utils/youtubeChannelAvatar';
-
-// Helper function to detect if input is a channel ID or handle
-function isChannelId(input: string): boolean {
-  // YouTube channel IDs are 24 characters starting with UC
-  return /^UC[a-zA-Z0-9_-]{22}$/.test(input);
-}
-
-// Helper function to format role mentions correctly
-function formatRoleMention(roleId: string, guildId: string): string {
-  if (roleId === guildId) {
-    // @everyone role
-    return '@everyone';
-  } else {
-    // Regular role
-    return `<@&${roleId}>`;
-  }
-}
+import { isChannelId, formatRoleMention } from '../../utils/helpers';
 
 export const setRoleSubcommand: SubcommandHandler = {
   name: 'set-role',

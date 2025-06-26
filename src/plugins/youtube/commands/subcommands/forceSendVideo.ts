@@ -9,6 +9,7 @@ import { extractVideoId } from '../../utils/extractVideoId';
 import { fetchVideoInfo } from '../../utils/fetchVideoInfo';
 import { getYouTubeChannelAvatar } from '../../../../utils/youtubeChannelAvatar';
 import { createVideoEmbed } from '../../utils/createVideoEmbed';
+import { fetchTextChannel, createErrorEmbed } from '../../utils/helpers';
 
 export const forceSendVideoSubcommand: SubcommandHandler = {
   name: 'force-send-video',
@@ -23,25 +24,15 @@ export const forceSendVideoSubcommand: SubcommandHandler = {
     const targetChannel = channelOption || interaction.channel;
     
     if (!targetChannel) {
-      const embed = new EmbedBuilder()
-        .setColor(0xff0000)
-        .setTitle('❌ Invalid Channel')
-        .setDescription('Could not determine the target channel.')
-        .setTimestamp();
-
+      const embed = createErrorEmbed('❌ Invalid Channel', 'Could not determine the target channel.');
       await interaction.editReply({ embeds: [embed] });
       return;
     }
 
     // Fetch the actual channel to ensure we have the right type
-    const actualChannel = await interaction.client.channels.fetch(targetChannel.id).catch(() => null);
-    if (!actualChannel || !actualChannel.isTextBased()) {
-      const embed = new EmbedBuilder()
-        .setColor(0xff0000)
-        .setTitle('❌ Invalid Channel')
-        .setDescription('The target channel is not a text channel or cannot be accessed.')
-        .setTimestamp();
-
+    const actualChannel = await fetchTextChannel(interaction.client, targetChannel.id);
+    if (!actualChannel) {
+      const embed = createErrorEmbed('❌ Invalid Channel', 'The target channel is not a text channel or cannot be accessed.');
       await interaction.editReply({ embeds: [embed] });
       return;
     }
