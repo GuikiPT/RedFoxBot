@@ -1,6 +1,7 @@
 # Custom
 commandCache.json
-database.sqlite
+database.sqlite*
+
 # Logs
 logs
 *.log

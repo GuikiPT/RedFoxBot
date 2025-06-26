@@ -29,10 +29,6 @@ export class PluginLoader {
       }
     }
 
-    console.log(
-      `✅ All plugins loaded! (${this.pluginManager.plugins.size} total)`
-    );
-
     const loadedPlugins = Array.from(this.pluginManager.plugins.values());
     if (loadedPlugins.length > 0) {
       const pluginInfos = loadedPlugins.map(plugin => ({
@@ -65,7 +61,7 @@ export class PluginLoader {
       }
 
       lines.push(bottom);
-      console.log(`\nLoaded plugins:\n${lines.join('\n')}\n`);
+      console.log(`✅ All plugins loaded! (${this.pluginManager.plugins.size} total):\n${lines.join('\n')}\n`);
     }
   }
 

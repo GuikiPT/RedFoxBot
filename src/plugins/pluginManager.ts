@@ -32,7 +32,7 @@ export class DefaultPluginManager implements PluginManager {
 
     this.plugins.set(plugin.name, plugin);
     this.listeners.set(plugin.name, registered);
-    console.log(`🎉 Plugin ${plugin.name} loaded successfully!`);
+    // console.log(`🎉 Plugin ${plugin.name} loaded successfully!`);
   }
 
   async unloadPlugin(pluginName: string, client: Client): Promise<void> {

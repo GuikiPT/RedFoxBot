@@ -133,25 +133,25 @@ export async function resolveYouTubeHandle(input: string): Promise<ChannelLookup
     }
   }
 
-  console.log(`Attempting to resolve YouTube handle: ${handle}`);
+  console.debug(`Attempting to resolve YouTube handle: ${handle}`);
 
   // Try web scraping first (most reliable)
   const webResult = await resolveHandleByWebScraping(handle);
   if (webResult.channelId) {
-    console.log(`✅ Resolved via web scraping: ${webResult.channelId}`);
+    console.debug(`✅ Resolved via web scraping: ${webResult.channelId}`);
     return webResult;
   }
 
-  console.log(`❌ Web scraping failed: ${webResult.error}`);
+  console.debug(`❌ Web scraping failed: ${webResult.error}`);
 
   // Try RSS feed method as fallback
   const rssResult = await resolveHandleByRssFeed(handle);
   if (rssResult.channelId) {
-    console.log(`✅ Resolved via RSS feed: ${rssResult.channelId}`);
+    console.debug(`✅ Resolved via RSS feed: ${rssResult.channelId}`);
     return rssResult;
   }
 
-  console.log(`❌ RSS feed failed: ${rssResult.error}`);
+  console.debug(`❌ RSS feed failed: ${rssResult.error}`);
 
   // All methods failed
   return {

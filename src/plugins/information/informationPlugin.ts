@@ -1,6 +1,7 @@
 import { Client } from "discord.js";
 import { Plugin } from "../types";
 import { ping } from "./commands/ping";
+import chalk from "chalk";
 
 export const informationPlugin: Plugin = {
   name: "information",
@@ -10,6 +11,6 @@ export const informationPlugin: Plugin = {
   events: [],
   global: true,
   load: async (client: Client) => {
-    console.log("Information plugin loaded - utility commands ready");
+    console.log(`❓ ${chalk.bold(chalk.red('Information plugin loaded!'))}`);
   }
 };
