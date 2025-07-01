@@ -1,4 +1,4 @@
-import { SubcommandHandler } from './types';
+import { SubcommandHandler } from '../../../types';
 import { lookupSubcommand } from './lookup';
 import { subscribeSubcommand } from './subscribe';
 import { unsubscribeSubcommand } from './unsubscribe';

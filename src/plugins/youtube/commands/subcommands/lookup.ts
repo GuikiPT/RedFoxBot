@@ -3,7 +3,7 @@ import {
   EmbedBuilder,
   MessageFlags,
 } from 'discord.js';
-import { SubcommandHandler } from './types';
+import { SubcommandHandler } from '../../../types';
 import { resolveYouTubeHandle } from '../../../../utils/youtubeHandleResolver';
 import { XMLTubeInfoFetcher } from '../../../../utils/xmlTubeInfoFetcher';
 import { getYouTubeChannelAvatar } from '../../../../utils/youtubeChannelAvatar';

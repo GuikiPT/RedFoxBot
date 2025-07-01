@@ -5,6 +5,11 @@ export interface Command {
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
 }
 
+export interface SubcommandHandler {
+  name: string;
+  execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+}
+
 export interface EventHandler {
   name: string;
   once?: boolean;

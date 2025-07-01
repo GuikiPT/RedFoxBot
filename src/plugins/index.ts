@@ -5,4 +5,5 @@ export { corePlugin } from "./core/corePlugin";
 export { informationPlugin } from "./information/informationPlugin";
 export { ownerPlugin } from "./owner/ownerPlugin";
 export { youtubePlugin } from "./youtube/youtubePlugin";
+export { starboardPlugin } from "./starboard/starboardPlugin";
 // export { examplePlugin } from "./example/examplePlugin";

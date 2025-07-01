@@ -4,7 +4,7 @@ import {
   GuildTextBasedChannel,
   MessageFlags,
 } from 'discord.js';
-import { SubcommandHandler } from './types';
+import { SubcommandHandler } from '../../../types';
 import { extractVideoId } from '../../utils/extractVideoId';
 import { fetchVideoInfo } from '../../utils/fetchVideoInfo';
 import { getYouTubeChannelAvatar } from '../../../../utils/youtubeChannelAvatar';
