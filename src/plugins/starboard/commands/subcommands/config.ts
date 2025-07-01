@@ -58,14 +58,21 @@ export const configSubcommand: SubcommandHandler = {
       }
 
       const embed = new EmbedBuilder()
-        .setColor(0x00ff00)
-        .setTitle('⭐ Starboard Configured')
-        .setDescription('The starboard has been successfully configured!')
+        .setColor(0xffd700) // Gold color for starboard
+        .setTitle('⭐ Starboard Configuration Updated')
+        .setDescription(`The starboard has been ${created ? 'configured' : 'updated'} and **enabled** for this server!`)
         .addFields(
-          { name: 'Channel', value: `<#${channel.id}>`, inline: true },
-          { name: 'Emoji', value: emoji, inline: true },
-          { name: 'Threshold', value: threshold.toString(), inline: true }
+          { name: '📍 Channel', value: `<#${channel.id}>`, inline: true },
+          { name: '⭐ Emoji', value: emoji, inline: true },
+          { name: '📊 Threshold', value: `${threshold} reaction${threshold !== 1 ? 's' : ''}`, inline: true },
+          { name: '🟢 Status', value: 'Enabled', inline: true },
+          { name: '\u200b', value: '\u200b', inline: true }, // Empty field for spacing
+          { name: '📅 Updated', value: `<t:${Math.floor(Date.now() / 1000)}:R>`, inline: true }
         )
+        .setFooter({ 
+          text: `${created ? 'Created' : 'Updated'} by ${interaction.user.displayName}`,
+          iconURL: interaction.user.displayAvatarURL()
+        })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });

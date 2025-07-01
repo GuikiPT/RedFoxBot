@@ -127,9 +127,19 @@ export const forceSendSubcommand: SubcommandHandler = {
       });
 
       const successEmbed = new EmbedBuilder()
-        .setColor(0x00ff00)
-        .setTitle('⭐ Message Sent to Starboard')
-        .setDescription(`Successfully sent the message to <#${config.channelId}>.`);
+        .setColor(0xffd700)
+        .setTitle('⭐ Message Force-Sent to Starboard')
+        .setDescription(`Successfully sent the message to the starboard channel!`)
+        .addFields(
+          { name: '📍 Starboard Channel', value: `<#${config.channelId}>`, inline: true },
+          { name: '📝 Original Message', value: `[View Message](${originalMessage.url})`, inline: true },
+          { name: '👤 Sent By', value: interaction.user.displayName, inline: true }
+        )
+        .setFooter({ 
+          text: `Force-sent by ${interaction.user.displayName}`,
+          iconURL: interaction.user.displayAvatarURL()
+        })
+        .setTimestamp();
 
       await interaction.editReply({ embeds: [successEmbed] });
     } catch (error) {

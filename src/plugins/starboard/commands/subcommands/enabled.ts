@@ -31,9 +31,19 @@ export const enabledSubcommand: SubcommandHandler = {
 
       if (!config) {
         const embed = new EmbedBuilder()
-          .setColor(0xff0000)
+          .setColor(0xff6600)
           .setTitle('❌ Starboard Not Configured')
-          .setDescription('The starboard is not configured for this server. Use `/starboard config` to set it up first.');
+          .setDescription('The starboard is not configured for this server.')
+          .addFields({
+            name: '🔧 Setup Required',
+            value: 'Use `/starboard config` to configure the starboard first.',
+            inline: false
+          })
+          .setFooter({ 
+            text: `Requested by ${interaction.user.displayName}`,
+            iconURL: interaction.user.displayAvatarURL()
+          })
+          .setTimestamp();
         await interaction.editReply({ embeds: [embed] });
         return;
       }
@@ -42,20 +52,26 @@ export const enabledSubcommand: SubcommandHandler = {
       config.enabled = isEnabling;
       await config.save();
 
+      const statusColor = isEnabling ? 0x00ff00 : 0x808080;
+      const statusIcon = isEnabling ? '🟢' : '🔴';
+      const actionText = isEnabling ? 'enabled' : 'disabled';
+
       const embed = new EmbedBuilder()
-        .setColor(isEnabling ? 0x00ff00 : 0xff6600)
+        .setColor(statusColor)
         .setTitle(`⭐ Starboard ${isEnabling ? 'Enabled' : 'Disabled'}`)
-        .setDescription(
-          isEnabling 
-            ? 'The starboard has been enabled for this server.' 
-            : 'The starboard has been disabled for this server.'
-        )
+        .setDescription(`The starboard has been successfully **${actionText}** for this server.`)
         .addFields(
-          { name: 'Channel', value: `<#${config.channelId}>`, inline: true },
-          { name: 'Emoji', value: config.emoji, inline: true },
-          { name: 'Threshold', value: config.emojiThreshold.toString(), inline: true },
-          { name: 'Status', value: isEnabling ? '🟢 Enabled' : '🔴 Disabled', inline: false }
+          { name: '📍 Channel', value: `<#${config.channelId}>`, inline: true },
+          { name: '⭐ Emoji', value: config.emoji, inline: true },
+          { name: '📊 Threshold', value: `${config.emojiThreshold} reaction${config.emojiThreshold !== 1 ? 's' : ''}`, inline: true },
+          { name: `${statusIcon} Status`, value: isEnabling ? 'Enabled' : 'Disabled', inline: true },
+          { name: '\u200b', value: '\u200b', inline: true }, // Empty field for spacing
+          { name: '📅 Updated', value: `<t:${Math.floor(Date.now() / 1000)}:R>`, inline: true }
         )
+        .setFooter({ 
+          text: `${isEnabling ? 'Enabled' : 'Disabled'} by ${interaction.user.displayName}`,
+          iconURL: interaction.user.displayAvatarURL()
+        })
         .setTimestamp();
 
       await interaction.editReply({ embeds: [embed] });

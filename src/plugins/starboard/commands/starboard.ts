@@ -34,6 +34,11 @@ export const starboard: Command = {
         )
         .addSubcommand(sub =>
             sub
+                .setName('view')
+                .setDescription('View current starboard configuration')
+        )
+        .addSubcommand(sub =>
+            sub
                 .setName('force-send')
                 .setDescription('Force send a message to the starboard')
                 .addStringOption(o =>
