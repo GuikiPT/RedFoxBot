@@ -7,6 +7,10 @@ import {
 } from 'discord.js';
 import { SubcommandHandler } from '../../../types';
 import { StarBoardConfig } from '../../../../db/models/StarBoardConfig';
+import { 
+  createStarboardMessagePackage,
+  createStarboardButtons 
+} from '../../utils/starboardHelpers';
 
 export const forceSendSubcommand: SubcommandHandler = {
   name: 'force-send',
@@ -95,36 +99,28 @@ export const forceSendSubcommand: SubcommandHandler = {
         return;
       }
 
-      // Create starboard embed
-      const starboardEmbed = new EmbedBuilder()
-        .setAuthor({
-          name: originalMessage.author.displayName || originalMessage.author.username,
-          iconURL: originalMessage.author.displayAvatarURL(),
-        })
-        .setDescription(originalMessage.content || '*No text content*')
-        .setColor(0xffd700)
-        .addFields({
-          name: 'Source',
-          value: `[Jump to message](${originalMessage.url}) in <#${originalMessage.channelId}>`,
-          inline: false,
-        })
-        .setTimestamp(originalMessage.createdAt);
+      // Create starboard message package with screenshot if enabled
+      const messagePackage = await createStarboardMessagePackage(
+        originalMessage,
+        1, // Force send doesn't have real reactions, so use 1
+        config.emoji,
+        interaction.client.user || undefined
+      );
 
-      // Add image if present
-      if (originalMessage.attachments.size > 0) {
-        const imageAttachment = originalMessage.attachments.find(att => 
-          att.contentType?.startsWith('image/')
-        );
-        if (imageAttachment) {
-          starboardEmbed.setImage(imageAttachment.url);
-        }
+      // Prepare message options
+      const messageOptions: any = {
+        content: `${config.emoji} **Force sent by ${interaction.user.displayName}**`,
+        embeds: [messagePackage.embed],
+        components: [messagePackage.buttons],
+      };
+
+      // Add screenshot attachment if available
+      if (messagePackage.attachment) {
+        messageOptions.files = [messagePackage.attachment];
       }
 
       // Send to starboard channel
-      await (starboardChannel as GuildTextBasedChannel).send({
-        content: `${config.emoji} **Force sent by ${interaction.user.displayName}**`,
-        embeds: [starboardEmbed],
-      });
+      await (starboardChannel as GuildTextBasedChannel).send(messageOptions);
 
       const successEmbed = new EmbedBuilder()
         .setColor(0xffd700)

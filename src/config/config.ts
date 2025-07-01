@@ -9,6 +9,8 @@ interface Config {
   OWNER_GUILD_IDS?: string[];
   LOG_TO_FILE: boolean;
   SQLITE_PATH: string;
+  STARBOARD_API_ENDPOINT?: string;
+  STARBOARD_SCREENSHOTS_ENABLED?: boolean;
   MARIADB_HOST?: string;
   MARIADB_PORT?: number;
   MARIADB_DB?: string;
@@ -24,6 +26,8 @@ function validateConfig(): Config {
     OWNER_GUILD_IDS,
     LOG_TO_FILE,
     SQLITE_PATH,
+    STARBOARD_API_ENDPOINT,
+    STARBOARD_SCREENSHOTS_ENABLED,
     MARIADB_HOST,
     MARIADB_PORT,
     MARIADB_DB,
@@ -48,6 +52,8 @@ function validateConfig(): Config {
     OWNER_GUILD_IDS: OWNER_GUILD_IDS ? OWNER_GUILD_IDS.split(',') : undefined,
     LOG_TO_FILE: LOG_TO_FILE === 'true',
     SQLITE_PATH: SQLITE_PATH || 'database.sqlite',
+    STARBOARD_API_ENDPOINT,
+    STARBOARD_SCREENSHOTS_ENABLED: STARBOARD_SCREENSHOTS_ENABLED === 'true',
     MARIADB_HOST,
     MARIADB_PORT: MARIADB_PORT ? parseInt(MARIADB_PORT, 10) : undefined,
     MARIADB_DB,

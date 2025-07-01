@@ -62,6 +62,17 @@ export const starboard: Command = {
                             { name: 'Disable', value: 'disable' }
                         )
                 )
+        )
+        .addSubcommand(sub =>
+            sub
+                .setName('test-screenshot')
+                .setDescription('Test screenshot generation for a message')
+                .addStringOption(o =>
+                    o
+                        .setName('message')
+                        .setDescription('Message URL or ID to test screenshot generation')
+                        .setRequired(true)
+                )
         ) as SlashCommandBuilder,
     async execute(interaction: ChatInputCommandInteraction) {
         const sub = interaction.options.getSubcommand();
