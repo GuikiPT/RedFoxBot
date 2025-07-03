@@ -16,9 +16,7 @@ export const reminderChecker: EventHandler = {
       } catch (error) {
         console.error('Error in reminder checker:', error);
       }
-    }, 10000);
-    
-    console.log('🔔 Reminder checker started');
+    }, 30000);
   }
 };
 
