@@ -65,6 +65,8 @@ src/
   OWNER_GUILD_IDS=optional_guild_ids_csv
   LOG_TO_FILE=true
   SQLITE_PATH=./data/database.sqlite
+  # Optional: Google AI API key for reminder enhancement
+  GOOGLE_AI_API_KEY=your_google_ai_api_key_here
   # Optional MariaDB backup database
   MARIADB_HOST=localhost
   MARIADB_PORT=3306

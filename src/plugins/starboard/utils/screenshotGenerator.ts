@@ -147,7 +147,11 @@ export async function generateMessageScreenshot(
     });
 
   } catch (error) {
-    console.error('❌ Error generating message screenshot:', error);
+    if (error instanceof Error) {
+      console.error('❌ Error generating message screenshot:', error.stack || error.message);
+    } else {
+      console.error('❌ Error generating message screenshot:', error);
+    }
     return null;
   } finally {
     if (browser) {

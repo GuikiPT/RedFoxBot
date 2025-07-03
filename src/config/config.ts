@@ -16,6 +16,7 @@ interface Config {
   MARIADB_DB?: string;
   MARIADB_USER?: string;
   MARIADB_PASSWORD?: string;
+  GOOGLE_AI_API_KEY?: string;
 }
 
 function validateConfig(): Config {
@@ -32,7 +33,8 @@ function validateConfig(): Config {
     MARIADB_PORT,
     MARIADB_DB,
     MARIADB_USER,
-    MARIADB_PASSWORD
+    MARIADB_PASSWORD,
+    GOOGLE_AI_API_KEY
   } = process.env;
   
   const requiredVars = ['DISCORD_TOKEN', 'DISCORD_CLIENT_ID'] as const;
@@ -59,6 +61,7 @@ function validateConfig(): Config {
     MARIADB_DB,
     MARIADB_USER,
     MARIADB_PASSWORD,
+    GOOGLE_AI_API_KEY,
   };
 }
 
