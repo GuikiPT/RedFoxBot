@@ -79,7 +79,7 @@ export const remind = {
     }
     
     try {
-      await subcommand.handler(interaction);
+      await subcommand.execute(interaction);
     } catch (error) {
       console.error(`Error executing remind subcommand "${subcommandName}":`, error);
       

@@ -1,9 +1,4 @@
-import { ChatInputCommandInteraction } from 'discord.js';
-
-export interface SubcommandHandler {
-  name: string;
-  handler: (interaction: ChatInputCommandInteraction) => Promise<void>;
-}
+import { SubcommandHandler } from '../../../types';
 
 import { reminder } from './reminder';
 import { listReminders } from './listReminders';

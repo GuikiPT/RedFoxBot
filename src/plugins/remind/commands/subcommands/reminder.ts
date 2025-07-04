@@ -1,21 +1,17 @@
-import { 
-  ChatInputCommandInteraction, 
-  EmbedBuilder, 
-  MessageFlags 
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags
 } from 'discord.js';
 import { Reminder } from '../../../../db/models';
 import { enhanceReminderMessage, isGoogleAIAvailable } from '../../../../utils/googleAI';
 import { parseTimeString, formatTimeRemaining } from '../../../../utils/timeParser';
 import { detectLanguage } from '../../../../utils/languageDetector';
-
-export interface SubcommandHandler {
-  name: string;
-  handler: (interaction: ChatInputCommandInteraction) => Promise<void>;
-}
+import { SubcommandHandler } from '../../../types';
 
 export const reminder: SubcommandHandler = {
   name: 'reminder',
-  async handler(interaction: ChatInputCommandInteraction) {
+  async execute(interaction: ChatInputCommandInteraction) {
     const description = interaction.options.getString('description', true);
     const isPublic = interaction.options.getBoolean('public') || false;
     
