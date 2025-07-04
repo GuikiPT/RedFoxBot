@@ -1,18 +1,14 @@
-import { 
-  ChatInputCommandInteraction, 
-  EmbedBuilder, 
-  MessageFlags 
+import {
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessageFlags
 } from 'discord.js';
 import { Reminder } from '../../../../db/models';
-
-export interface SubcommandHandler {
-  name: string;
-  handler: (interaction: ChatInputCommandInteraction) => Promise<void>;
-}
+import { SubcommandHandler } from '../../../types';
 
 export const deleteReminder: SubcommandHandler = {
   name: 'delete_reminder',
-  async handler(interaction: ChatInputCommandInteraction) {
+  async execute(interaction: ChatInputCommandInteraction) {
     const reminderId = interaction.options.getInteger('reminder_id', true);
     const isPublic = interaction.options.getBoolean('public') || false;
     

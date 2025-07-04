@@ -6,6 +6,7 @@ import { remind } from './commands/remind';
 import { reminderChecker } from './events/reminderChecker';
 import { reminderButtonHandler } from './events/reminderButtonHandler';
 import { reminderModalHandler } from './events/reminderModalHandler';
+import { reminderListPaginationHandler } from './events/reminderListPaginationHandler';
 import chalk from 'chalk';
 
 export const remindPlugin: Plugin = {
@@ -13,7 +14,7 @@ export const remindPlugin: Plugin = {
     description: 'Plugin to remind users of tasks or events with AI enhancement and interactive controls',
     authors: ['GuikiPT'],
     commands: [remind],
-    events: [reminderChecker, reminderButtonHandler, reminderModalHandler],
+    events: [reminderChecker, reminderButtonHandler, reminderModalHandler, reminderListPaginationHandler],
     async load(client: Client) {
         // Initialize Google AI for reminder enhancement
         const aiInitialized = initializeGoogleAI();
