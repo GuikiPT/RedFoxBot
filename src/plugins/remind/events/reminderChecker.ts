@@ -11,7 +11,6 @@ export const reminderChecker: EventHandler = {
     // Set up a periodic check for reminders every minute
     setInterval(async () => {
       try {
-        console.log('🔔 Checking for due reminders...');
         await checkAndSendReminders(client);
       } catch (error) {
         console.error('Error in reminder checker:', error);
